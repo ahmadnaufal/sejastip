@@ -1,0 +1,7 @@
+require 'standalone_migrations'
+require 'dotenv/load'
+require 'mysql2'
+
+Dotenv.load
+
+StandaloneMigrations::Tasks.load_tasks
