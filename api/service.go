@@ -81,6 +81,25 @@ type UserPublic struct {
 	Avatar       string    `json:"avatar"`
 }
 
+// AuthCredentials stores user authentication credentials
+type AuthCredentials struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+// Normalize is a method to normalize all field values
+func (a *AuthCredentials) Normalize() {
+	a.Email = strings.TrimSpace(a.Email)
+	a.Password = strings.TrimSpace(a.Password)
+}
+
+// AuthResponse is our structure for token response after user authentication
+type AuthResponse struct {
+	Token     string    `json:"token"`
+	CreatedAt time.Time `json:"created_at"`
+	ExpiredAt time.Time `json:"expired_at"`
+}
+
 // UserRepository is a contract for structs implementing user storage
 type UserRepository interface {
 	CreateUser(ctx context.Context, user *User) error
@@ -94,4 +113,9 @@ type UserRepository interface {
 type UserUsecase interface {
 	Register(ctx context.Context, user *User) (*UserPublic, error)
 	GetUser(ctx context.Context, ID int64) (*UserPublic, error)
+}
+
+// AuthUsecase is a contract for usecase related to authentication
+type AuthUsecase interface {
+	AuthenticateUser(ctx context.Context, auth *AuthCredentials) (*AuthResponse, error)
 }

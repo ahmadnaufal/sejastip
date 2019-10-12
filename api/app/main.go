@@ -33,6 +33,8 @@ type Config struct {
 	}
 
 	Port string `env:"PORT,required"`
+
+	JWTPrivateKey string `env:"JWT_PRIVATE_KEY,required"`
 }
 
 var config Config
@@ -74,7 +76,13 @@ func main() {
 	uuc := usecase.NewUserUsecase(&usecase.UserProvider{UserRepository: userRepo})
 	uh := delivery.NewUserHandler(uuc)
 
-	h := handler.NewHandler(&uh)
+	auc := usecase.NewAuthUsecase(&usecase.AuthProvider{
+		UserRepository: userRepo,
+		JWTPrivateKey:  config.JWTPrivateKey,
+	})
+	ah := delivery.NewAuthHandler(auc)
+
+	h := handler.NewHandler(&uh, &ah)
 
 	s := &http.Server{
 		Addr:         fmt.Sprintf(":%s", config.Port),

@@ -2,6 +2,7 @@ module sejastip.id/api
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.3.3
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-sql-driver/mysql v1.4.0
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/joeshaw/envdecode v0.0.0-20190604014844-d6d9849fcc2c

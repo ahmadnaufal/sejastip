@@ -15,8 +15,15 @@ var (
 	// ErrInvalidParameter represents generic invalid param error
 	ErrInvalidParameter = SejastipError{
 		Message:    "Parameter tidak valid",
-		ErrorCode:  401,
+		ErrorCode:  400,
 		HTTPStatus: http.StatusBadRequest,
+	}
+
+	// ErrInvalidCredentials represents error for invalid auth credentials
+	ErrInvalidCredentials = SejastipError{
+		Message:    "Email atau password salah",
+		ErrorCode:  401,
+		HTTPStatus: http.StatusUnauthorized,
 	}
 )
 
