@@ -12,11 +12,17 @@ all: compile test
 test:
 	go test -v ./...
 
+coverage:
+	go tool cover -html=cover.out -o cover.html
+
+bin:
+	go build -o sejastip-api app/main.go
+
 mod:
 	go mod tidy
 
 compile:
-	GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go build -o sejastip-api main.go
+	GOOS=$(GOOS) GOARCH=$(GOARCH) CGO_ENABLED=0 go build -o sejastip-api app/main.go
 
 migration:
 	@echo "class Migration < ActiveRecord::Migration[5.1]\n  def up\n  end\n\n  def down\n  end\nend" > db/migrate/$(TIMESTAMP)_migration.rb
