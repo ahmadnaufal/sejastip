@@ -29,9 +29,9 @@ func (h *UserHandler) RegisterHandler(r *httprouter.Router) error {
 		return errors.New("Router must not be nil")
 	}
 
-	d := handler.DefaultMiddlewares()
-	r.POST("/users", handler.Decorate(h.Register, d...))
-	r.GET("/users/:id", handler.Decorate(h.GetUser, d...))
+	r.POST("/users", handler.Decorate(h.Register, handler.AppAuth...))
+	r.GET("/users/:id", handler.Decorate(h.GetUser, handler.AppAuth...))
+	r.GET("/me", handler.Decorate(h.GetMe, handler.UserAuth...))
 
 	return nil
 }
@@ -69,6 +69,22 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request, p httprout
 	// Get user by id
 	ctx := r.Context()
 	user, err := h.uc.GetUser(ctx, id)
+	if err != nil {
+		api.Error(w, err)
+		return err
+	}
+
+	api.OK(w, user, nil)
+	return nil
+}
+
+// GetMe is a handler to get the logged in user's data
+func (h *UserHandler) GetMe(w http.ResponseWriter, r *http.Request, _ httprouter.Params) error {
+	ctx := r.Context()
+	claims := api.MetaFromContext(ctx)
+
+	// get user from claim in context
+	user, err := h.uc.GetUser(ctx, claims.ID)
 	if err != nil {
 		api.Error(w, err)
 		return err

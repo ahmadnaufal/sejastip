@@ -7,13 +7,27 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+var (
+	dms = DefaultMiddlewares()
+
+	AppAuth  []Middleware
+	UserAuth []Middleware
+)
+
 // Route is a contract to bind our http routers
 type Route interface {
 	RegisterHandler(r *httprouter.Router) error
 }
 
+func initAuthMiddlewares(privateKey string) {
+	UserAuth = append([]Middleware{WithAuthentication(privateKey)}, dms...)
+	AppAuth = dms
+}
+
 // NewHandler return standard handlers for our service
-func NewHandler(routes ...Route) http.Handler {
+func NewHandler(jwtPrivateKey string, routes ...Route) http.Handler {
+	initAuthMiddlewares(jwtPrivateKey)
+
 	router := httprouter.New()
 
 	router.HandlerFunc("GET", "/healthz", Healthz)

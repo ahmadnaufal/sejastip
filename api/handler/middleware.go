@@ -1,10 +1,17 @@
 package handler
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"net/http"
+	"regexp"
 	"strconv"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+
+	"sejastip.id/api"
 
 	"github.com/julienschmidt/httprouter"
 	"go.uber.org/zap"
@@ -54,6 +61,37 @@ func WithLogging(logger *zap.Logger) Middleware {
 			}
 
 			return err
+		}
+	}
+}
+
+// WithAuthentication encapsulates standard handlers with authentication
+func WithAuthentication(privateKey string) Middleware {
+	return func(handle StandardHandler) StandardHandler {
+		return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) error {
+			authHeader := r.Header.Get("Authorization")
+			match, _ := regexp.MatchString("^Token ", authHeader)
+			if !match {
+				log.Println("Unaut coj")
+				api.Error(w, api.ErrUnauthorized)
+				return api.ErrUnauthorized
+			}
+
+			// get claims
+			claims := api.ResourceClaims{}
+			tokenString := authHeader[6:]
+			token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
+				return []byte(privateKey), nil
+			})
+			if err != nil || !token.Valid {
+				log.Println("Unaut yok", err)
+				api.Error(w, api.ErrUnauthorized)
+				return api.ErrUnauthorized
+			}
+
+			ctx := r.Context()
+			ctx = context.WithValue(ctx, api.ContextKeyName, claims)
+			return handle(w, r.WithContext(ctx), p)
 		}
 	}
 }

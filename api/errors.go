@@ -25,6 +25,13 @@ var (
 		ErrorCode:  401,
 		HTTPStatus: http.StatusUnauthorized,
 	}
+
+	// ErrUnauthorized represents
+	ErrUnauthorized = SejastipError{
+		Message:    "Unauthorized",
+		ErrorCode:  401,
+		HTTPStatus: http.StatusUnauthorized,
+	}
 )
 
 // SejastipError defines our custom error

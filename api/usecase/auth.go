@@ -21,15 +21,6 @@ type authUsecase struct {
 	*AuthProvider
 }
 
-type resourceClaims struct {
-	ID           int64     `json:"id"`
-	Email        string    `json:"email"`
-	Name         string    `json:"name"`
-	Phone        string    `json:"phone"`
-	RegisteredAt time.Time `json:"registered_at"`
-	jwt.StandardClaims
-}
-
 // NewAuthUsecase creates an instance of AuthUsecase
 func NewAuthUsecase(pvd *AuthProvider) api.AuthUsecase {
 	return &authUsecase{pvd}
@@ -52,7 +43,7 @@ func (u *authUsecase) AuthenticateUser(ctx context.Context, auth *api.AuthCreden
 	// After all credentials are valid, we create a claim to store all user data
 	createdAt := time.Now()
 	expirationTime := time.Now().Add(3 * time.Hour)
-	claims := resourceClaims{
+	claims := api.ResourceClaims{
 		ID:           user.ID,
 		Email:        user.Email,
 		Name:         user.Name,

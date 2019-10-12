@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 // User stores database row representations of a user data
@@ -91,6 +93,16 @@ type AuthCredentials struct {
 func (a *AuthCredentials) Normalize() {
 	a.Email = strings.TrimSpace(a.Email)
 	a.Password = strings.TrimSpace(a.Password)
+}
+
+// ResourceClaims for claims
+type ResourceClaims struct {
+	ID           int64     `json:"id"`
+	Email        string    `json:"email"`
+	Name         string    `json:"name"`
+	Phone        string    `json:"phone"`
+	RegisteredAt time.Time `json:"registered_at"`
+	jwt.StandardClaims
 }
 
 // AuthResponse is our structure for token response after user authentication

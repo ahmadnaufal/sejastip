@@ -82,7 +82,7 @@ func main() {
 	})
 	ah := delivery.NewAuthHandler(auc)
 
-	h := handler.NewHandler(&uh, &ah)
+	h := handler.NewHandler(config.JWTPrivateKey, &uh, &ah)
 
 	s := &http.Server{
 		Addr:         fmt.Sprintf(":%s", config.Port),
