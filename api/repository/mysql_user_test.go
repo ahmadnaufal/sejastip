@@ -60,6 +60,7 @@ func (s *mysqlUserTestSuite) TestCreateUser() {
 	s.NoError(err)
 	s.Equal(user.ID, int64(1))
 }
+
 func (s *mysqlUserTestSuite) TestUpdateUser() {
 	user := fixture.StubbedUser()
 

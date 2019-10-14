@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -26,7 +25,6 @@ func (m *mysqlUser) CreateUser(ctx context.Context, user *api.User) error {
 	now := time.Now()
 	user.CreatedAt = now
 	user.UpdatedAt = now
-	log.Println(user)
 
 	query := `INSERT INTO users
 		(email, name, phone, password, bank_name, bank_account,

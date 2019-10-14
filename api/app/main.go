@@ -10,6 +10,8 @@ import (
 	"syscall"
 	"time"
 
+	"sejastip.id/api/storage"
+
 	"sejastip.id/api/delivery"
 	"sejastip.id/api/handler"
 	"sejastip.id/api/repository"
@@ -73,6 +75,9 @@ func main() {
 	}
 
 	userRepo := repository.NewMysqlUser(db)
+	bankRepo := repository.NewMysqlBank(db)
+	storage := storage.NewLocalStorage()
+
 	uuc := usecase.NewUserUsecase(&usecase.UserProvider{UserRepository: userRepo})
 	uh := delivery.NewUserHandler(uuc)
 
@@ -82,7 +87,13 @@ func main() {
 	})
 	ah := delivery.NewAuthHandler(auc)
 
-	h := handler.NewHandler(config.JWTPrivateKey, &uh, &ah)
+	buc := usecase.NewBankUsecase(&usecase.BankProvider{
+		BankRepo: bankRepo,
+		Storage:  storage,
+	})
+	bh := delivery.NewBankHandler(buc)
+
+	h := handler.NewHandler(config.JWTPrivateKey, &uh, &ah, &bh)
 
 	s := &http.Server{
 		Addr:         fmt.Sprintf(":%s", config.Port),

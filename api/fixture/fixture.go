@@ -22,3 +22,14 @@ func StubbedUser() api.User {
 		UpdatedAt:   now,
 	}
 }
+
+// StubbedBank create a stubbed bank row
+func StubbedBank() api.Bank {
+	now := time.Now()
+	return api.Bank{
+		Name:      "Bank Krud",
+		Image:     "https://sejastip.id/img/rockybalboa.jpg",
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+}
