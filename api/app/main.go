@@ -34,6 +34,11 @@ type Config struct {
 		Charset  string `env:"DATABASE_CHARSET,required"`
 	}
 
+	GCS struct {
+		Enabled  bool   `env:"GCS_ENABLED,default=false"`
+		BucketID string `env:"GCS_BUCKET_ID,required"`
+	}
+
 	Port string `env:"PORT,required"`
 
 	JWTPrivateKey string `env:"JWT_PRIVATE_KEY,required"`
@@ -76,7 +81,10 @@ func main() {
 
 	userRepo := repository.NewMysqlUser(db)
 	bankRepo := repository.NewMysqlBank(db)
-	storage := storage.NewLocalStorage()
+	appStorage := storage.NewLocalStorage()
+	if config.GCS.Enabled {
+		appStorage = storage.NewGCS(config.GCS.BucketID)
+	}
 
 	uuc := usecase.NewUserUsecase(&usecase.UserProvider{UserRepository: userRepo})
 	uh := delivery.NewUserHandler(uuc)
@@ -89,7 +97,7 @@ func main() {
 
 	buc := usecase.NewBankUsecase(&usecase.BankProvider{
 		BankRepo: bankRepo,
-		Storage:  storage,
+		Storage:  appStorage,
 	})
 	bh := delivery.NewBankHandler(buc)
 

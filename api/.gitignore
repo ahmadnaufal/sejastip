@@ -18,3 +18,9 @@
 
 # Development binary generated with `make compile`
 sejastip-api
+
+# Exclude all credentials stored in json
+*.json
+
+# Exclude public directory
+public/*
