@@ -39,6 +39,6 @@ func (u *bankUsecase) GetBanks(ctx context.Context, limit, offset int) ([]api.Ba
 	return banks, count, nil
 }
 
-func (u *bankUsecase) UploadBankImage(ctx context.Context, filename string, content []byte) error {
+func (u *bankUsecase) UploadBankImage(ctx context.Context, filename string, content []byte) (string, error) {
 	return u.BankProvider.Storage.Store("banks/"+filename, content)
 }

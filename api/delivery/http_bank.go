@@ -55,7 +55,7 @@ func (h *BankHandler) CreateBank(w http.ResponseWriter, r *http.Request, _ httpr
 
 	// upload file
 	filename := fmt.Sprintf("%s%s", bankForm.Name, extension)
-	err = h.uc.UploadBankImage(ctx, filename, file)
+	filePath, err := h.uc.UploadBankImage(ctx, filename, file)
 	if err != nil {
 		api.Error(w, err)
 		return errors.Wrap(err, "error in uploading file")
@@ -63,7 +63,7 @@ func (h *BankHandler) CreateBank(w http.ResponseWriter, r *http.Request, _ httpr
 
 	bank := api.Bank{
 		Name:  bankForm.Name,
-		Image: filename,
+		Image: filePath,
 	}
 	err = h.uc.CreateBank(ctx, &bank)
 	if err != nil {

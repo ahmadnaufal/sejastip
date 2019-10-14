@@ -158,5 +158,5 @@ type AuthUsecase interface {
 type BankUsecase interface {
 	CreateBank(ctx context.Context, bank *Bank) error
 	GetBanks(ctx context.Context, limit, offset int) ([]Bank, int64, error)
-	UploadBankImage(ctx context.Context, filename string, content []byte) error
+	UploadBankImage(ctx context.Context, filename string, content []byte) (string, error)
 }
