@@ -7,6 +7,8 @@ class CreateProducts < ActiveRecord::Migration[5.1]
       t.bigint  :seller_id, null: false
       t.bigint  :country_id, null: false
       t.integer :status, unsigned: true, limit: 1, default: 1
+      t.date    :from_date, null: false
+      t.date    :to_date, null: false
 
       t.timestamps
 

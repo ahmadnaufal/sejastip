@@ -35,6 +35,8 @@ ActiveRecord::Schema.define(version: 2019_10_21_203339) do
     t.bigint "seller_id", null: false
     t.bigint "country_id", null: false
     t.integer "status", limit: 1, default: 1, unsigned: true
+    t.date "from_date", null: false
+    t.date "to_date", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["country_id"], name: "index_products_on_country_id"
