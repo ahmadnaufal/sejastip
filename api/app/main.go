@@ -17,6 +17,7 @@ import (
 	"sejastip.id/api/repository"
 	"sejastip.id/api/usecase"
 
+	"github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/mysql"
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/joeshaw/envdecode"
@@ -25,13 +26,15 @@ import (
 
 type Config struct {
 	Database struct {
-		User     string `env:"DATABASE_USER,required"`
-		Password string `env:"DATABASE_PASSWORD,required"`
-		Host     string `env:"DATABASE_HOST,required"`
-		Port     string `env:"DATABASE_PORT,required"`
-		Name     string `env:"DATABASE_NAME,required"`
-		Pool     int    `env:"DATABASE_POOL,required"`
-		Charset  string `env:"DATABASE_CHARSET,required"`
+		User                   string `env:"DATABASE_USER,required"`
+		Password               string `env:"DATABASE_PASSWORD,required"`
+		Host                   string `env:"DATABASE_HOST,default=127.0.0.1"`
+		Port                   string `env:"DATABASE_PORT,default=3306"`
+		Name                   string `env:"DATABASE_NAME,default=sejastip"`
+		Pool                   int    `env:"DATABASE_POOL,default=5"`
+		Charset                string `env:"DATABASE_CHARSET,default=utf8"`
+		CloudSQLEnabled        bool   `env:"DATABASE_CLOUD_SQL_ENABLED,default=false"`
+		CloudSQLConnectionName string `env:"DATABASE_CLOUD_SQL_CONNECTION_NAME"`
 	}
 
 	GCS struct {
@@ -73,8 +76,30 @@ func NewMysqlConnection(c *Config) (*sql.DB, error) {
 	return db, err
 }
 
+func NewCloudSqlConnection(c *Config) (*sql.DB, error) {
+	cfg := mysql.Cfg(c.Database.CloudSQLConnectionName, c.Database.User, c.Database.Password)
+	cfg.DBName = c.Database.Name
+	db, err := mysql.DialCfg(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db.SetMaxOpenConns(c.Database.Pool)
+	err = db.Ping()
+	return db, err
+}
+
 func main() {
-	db, err := NewMysqlConnection(&config)
+	var (
+		db  *sql.DB
+		err error
+	)
+	if config.Database.CloudSQLEnabled {
+		db, err = NewCloudSqlConnection(&config)
+	} else {
+		db, err = NewMysqlConnection(&config)
+	}
+
 	if err != nil {
 		log.Fatal(err)
 	}

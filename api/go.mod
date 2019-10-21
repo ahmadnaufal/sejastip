@@ -2,6 +2,7 @@ module sejastip.id/api
 
 require (
 	cloud.google.com/go/storage v1.1.0
+	github.com/GoogleCloudPlatform/cloudsql-proxy v0.0.0-20191010210010-c384db38a6f3
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/jmoiron/sqlx v1.2.0
