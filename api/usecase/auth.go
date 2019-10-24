@@ -9,6 +9,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
 	"sejastip.id/api"
+	"sejastip.id/api/entity"
 )
 
 // AuthProvider is a wrapper of dependencies used by the implementation of AuthUsecase
@@ -27,7 +28,7 @@ func NewAuthUsecase(pvd *AuthProvider) api.AuthUsecase {
 }
 
 // AuthenticateUser handles user authentication based on the provided credentials
-func (u *authUsecase) AuthenticateUser(ctx context.Context, auth *api.AuthCredentials) (*api.AuthResponse, error) {
+func (u *authUsecase) AuthenticateUser(ctx context.Context, auth *entity.AuthCredentials) (*entity.AuthResponse, error) {
 	// get the user first
 	user, err := u.AuthProvider.UserRepository.GetUserByEmail(ctx, auth.Email)
 	if err != nil {
@@ -43,7 +44,7 @@ func (u *authUsecase) AuthenticateUser(ctx context.Context, auth *api.AuthCreden
 	// After all credentials are valid, we create a claim to store all user data
 	createdAt := time.Now()
 	expirationTime := time.Now().Add(3 * time.Hour)
-	claims := api.ResourceClaims{
+	claims := entity.ResourceClaims{
 		ID:           user.ID,
 		Email:        user.Email,
 		Name:         user.Name,
@@ -62,7 +63,7 @@ func (u *authUsecase) AuthenticateUser(ctx context.Context, auth *api.AuthCreden
 		return nil, err
 	}
 
-	authResponse := &api.AuthResponse{
+	authResponse := &entity.AuthResponse{
 		Token:     tokenString,
 		CreatedAt: createdAt,
 		ExpiredAt: expirationTime,

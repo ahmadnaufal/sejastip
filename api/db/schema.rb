@@ -34,15 +34,19 @@ ActiveRecord::Schema.define(version: 2019_10_21_203339) do
     t.integer "price", default: 0, unsigned: true
     t.bigint "seller_id", null: false
     t.bigint "country_id", null: false
+    t.string "image", null: false
     t.integer "status", limit: 1, default: 1, unsigned: true
     t.date "from_date", null: false
     t.date "to_date", null: false
+    t.timestamp "deleted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["country_id"], name: "index_products_on_country_id"
-    t.index ["seller_id"], name: "index_products_on_seller_id"
-    t.index ["title", "country_id"], name: "index_products_on_title_and_country_id"
-    t.index ["title", "seller_id"], name: "index_products_on_title_and_seller_id"
+    t.index ["country_id", "deleted_at"], name: "index_products_on_country_id_and_deleted_at"
+    t.index ["deleted_at"], name: "index_products_on_deleted_at"
+    t.index ["seller_id", "deleted_at"], name: "index_products_on_seller_id_and_deleted_at"
+    t.index ["title", "country_id", "deleted_at"], name: "index_products_on_title_and_country_id_and_deleted_at"
+    t.index ["title", "deleted_at"], name: "index_products_on_title_and_deleted_at"
+    t.index ["title", "seller_id", "deleted_at"], name: "index_products_on_title_and_seller_id_and_deleted_at"
     t.index ["title"], name: "index_products_on_title"
   end
 

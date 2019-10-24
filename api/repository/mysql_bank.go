@@ -7,6 +7,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"sejastip.id/api"
+	"sejastip.id/api/entity"
 )
 
 type mysqlBank struct {
@@ -20,7 +21,7 @@ func NewMysqlBank(db *sql.DB) api.BankRepository {
 }
 
 // CreateBank inserts a bank data to repository
-func (m *mysqlBank) CreateBank(ctx context.Context, bank *api.Bank) error {
+func (m *mysqlBank) CreateBank(ctx context.Context, bank *entity.Bank) error {
 	now := time.Now()
 	bank.CreatedAt = now
 	bank.UpdatedAt = now
@@ -48,7 +49,7 @@ func (m *mysqlBank) CreateBank(ctx context.Context, bank *api.Bank) error {
 }
 
 // GetBanks get all registered banks
-func (m *mysqlBank) GetBanks(ctx context.Context, limit, offset int) ([]api.Bank, int64, error) {
+func (m *mysqlBank) GetBanks(ctx context.Context, limit, offset int) ([]entity.Bank, int64, error) {
 	var count int64
 	err := m.db.GetContext(ctx, &count, `SELECT COUNT(id) FROM banks`)
 	if err != nil {
@@ -61,19 +62,19 @@ func (m *mysqlBank) GetBanks(ctx context.Context, limit, offset int) ([]api.Bank
 		ORDER BY name DESC
 		LIMIT ?, ?
 	`
-	results := []api.Bank{}
+	results := []entity.Bank{}
 	err = m.db.SelectContext(ctx, &results, query, offset, limit)
 	return results, count, err
 }
 
 // GetBankByName returns a bank in mysql, by the bank name
-func (m *mysqlBank) GetBankByName(ctx context.Context, name string) (*api.Bank, error) {
+func (m *mysqlBank) GetBankByName(ctx context.Context, name string) (*entity.Bank, error) {
 	query := `
 		SELECT * FROM banks
 		WHERE name = ?
 		LIMIT 1
 	`
-	var result api.Bank
+	var result entity.Bank
 	err := m.db.GetContext(ctx, &result, query, name)
 	if err == sql.ErrNoRows {
 		return nil, api.ErrNotFound

@@ -107,6 +107,7 @@ func main() {
 	userRepo := repository.NewMysqlUser(db)
 	bankRepo := repository.NewMysqlBank(db)
 	countryRepo := repository.NewMysqlCountry(db)
+	productRepo := repository.NewMysqlProduct(db)
 	appStorage := storage.NewLocalStorage()
 	if config.GCS.Enabled {
 		appStorage = storage.NewGCS(config.GCS.BucketID)
@@ -133,7 +134,15 @@ func main() {
 	})
 	ch := delivery.NewCountryHandler(cuc)
 
-	h := handler.NewHandler(config.JWTPrivateKey, &uh, &ah, &bh, &ch)
+	puc := usecase.NewProductUsecase(&usecase.ProductProvider{
+		ProductRepo: productRepo,
+		UserRepo:    userRepo,
+		CountryRepo: countryRepo,
+		Storage:     appStorage,
+	})
+	ph := delivery.NewProductHandler(puc)
+
+	h := handler.NewHandler(config.JWTPrivateKey, &uh, &ah, &bh, &ch, &ph)
 
 	s := &http.Server{
 		Addr:         fmt.Sprintf(":%s", config.Port),

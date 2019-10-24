@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"sejastip.id/api"
+	"sejastip.id/api/entity"
 	"sejastip.id/api/handler"
 
 	"github.com/julienschmidt/httprouter"
@@ -37,7 +38,7 @@ func (h *AuthHandler) RegisterHandler(r *httprouter.Router) error {
 // Authenticate is a handler for user authentication
 func (h *AuthHandler) Authenticate(w http.ResponseWriter, r *http.Request, _ httprouter.Params) error {
 	decoder := json.NewDecoder(r.Body)
-	var auth api.AuthCredentials
+	var auth entity.AuthCredentials
 	if err := decoder.Decode(&auth); err != nil {
 		err = api.ErrInvalidParameter
 		api.Error(w, err)

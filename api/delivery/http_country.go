@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"sejastip.id/api/entity"
 	"sejastip.id/api/util"
 
 	"github.com/julienschmidt/httprouter"
@@ -36,7 +37,7 @@ func (h *CountryHandler) RegisterHandler(r *httprouter.Router) error {
 
 func (h *CountryHandler) CreateCountry(w http.ResponseWriter, r *http.Request, _ httprouter.Params) error {
 	decoder := json.NewDecoder(r.Body)
-	var countryForm api.CountryForm
+	var countryForm entity.CountryForm
 	if err := decoder.Decode(&countryForm); err != nil {
 		api.Error(w, err)
 		return err
@@ -63,7 +64,7 @@ func (h *CountryHandler) CreateCountry(w http.ResponseWriter, r *http.Request, _
 		return errors.Wrap(err, "error in uploading file")
 	}
 
-	country := api.Country{
+	country := entity.Country{
 		Name:  countryForm.Name,
 		Image: filePath,
 	}

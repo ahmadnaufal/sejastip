@@ -7,6 +7,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"sejastip.id/api"
+	"sejastip.id/api/entity"
 )
 
 type mysqlCountry struct {
@@ -20,7 +21,7 @@ func NewMysqlCountry(db *sql.DB) api.CountryRepository {
 }
 
 // CreateCountry inserts a country data to repository
-func (m *mysqlCountry) CreateCountry(ctx context.Context, country *api.Country) error {
+func (m *mysqlCountry) CreateCountry(ctx context.Context, country *entity.Country) error {
 	now := time.Now()
 	country.CreatedAt = now
 	country.UpdatedAt = now
@@ -48,7 +49,7 @@ func (m *mysqlCountry) CreateCountry(ctx context.Context, country *api.Country) 
 }
 
 // GetCountries get all registered countries
-func (m *mysqlCountry) GetCountries(ctx context.Context, limit, offset int) ([]api.Country, int64, error) {
+func (m *mysqlCountry) GetCountries(ctx context.Context, limit, offset int) ([]entity.Country, int64, error) {
 	var count int64
 	err := m.db.GetContext(ctx, &count, `SELECT COUNT(id) FROM countries`)
 	if err != nil {
@@ -61,19 +62,19 @@ func (m *mysqlCountry) GetCountries(ctx context.Context, limit, offset int) ([]a
 		ORDER BY name ASC
 		LIMIT ?, ?
 	`
-	results := []api.Country{}
+	results := []entity.Country{}
 	err = m.db.SelectContext(ctx, &results, query, offset, limit)
 	return results, count, err
 }
 
 // GetCountry returns a country in mysql, by the ID
-func (m *mysqlCountry) GetCountry(ctx context.Context, ID int64) (*api.Country, error) {
+func (m *mysqlCountry) GetCountry(ctx context.Context, ID int64) (*entity.Country, error) {
 	query := `
 		SELECT * FROM countries
 		WHERE id = ?
 		LIMIT 1
 	`
-	var result api.Country
+	var result entity.Country
 	err := m.db.GetContext(ctx, &result, query, ID)
 	if err == sql.ErrNoRows {
 		return nil, api.ErrNotFound

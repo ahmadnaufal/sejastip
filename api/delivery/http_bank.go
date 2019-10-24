@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"sejastip.id/api/entity"
 	"sejastip.id/api/util"
 
 	"github.com/julienschmidt/httprouter"
@@ -34,7 +35,7 @@ func (h *BankHandler) RegisterHandler(r *httprouter.Router) error {
 
 func (h *BankHandler) CreateBank(w http.ResponseWriter, r *http.Request, _ httprouter.Params) error {
 	decoder := json.NewDecoder(r.Body)
-	var bankForm api.BankForm
+	var bankForm entity.BankForm
 	if err := decoder.Decode(&bankForm); err != nil {
 		api.Error(w, err)
 		return err
@@ -61,7 +62,7 @@ func (h *BankHandler) CreateBank(w http.ResponseWriter, r *http.Request, _ httpr
 		return errors.Wrap(err, "error in uploading file")
 	}
 
-	bank := api.Bank{
+	bank := entity.Bank{
 		Name:  bankForm.Name,
 		Image: filePath,
 	}

@@ -1,9 +1,12 @@
 package api
 
 import (
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"sejastip.id/api/entity"
 )
 
 type PaginationMeta struct {
@@ -25,6 +28,17 @@ func NewPaginationMeta(limit, offset, total int) PaginationMeta {
 type QueryHelper struct {
 	r  *http.Request
 	uv url.Values
+}
+
+// GetFilters build a dynamic filter by iterating through the query parameters
+func (q *QueryHelper) GetFilters() entity.DynamicFilter {
+	filters := entity.DynamicFilter{}
+	log.Println(q.uv)
+	for key, val := range q.uv {
+		filters[key] = val[0]
+	}
+
+	return filters
 }
 
 // GetString to get query url value with string data type, return empty string if query url not found

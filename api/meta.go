@@ -1,6 +1,10 @@
 package api
 
-import "context"
+import (
+	"context"
+
+	"sejastip.id/api/entity"
+)
 
 // A ContextID represents context key for middleware.
 type ContextID struct {
@@ -11,6 +15,6 @@ type ContextID struct {
 var ContextKeyName = &ContextID{name: "sejastip"}
 
 //MetaFromContext is function to get metainfo from context
-func MetaFromContext(ctx context.Context) ResourceClaims {
-	return ctx.Value(ContextKeyName).(ResourceClaims)
+func MetaFromContext(ctx context.Context) entity.ResourceClaims {
+	return ctx.Value(ContextKeyName).(entity.ResourceClaims)
 }

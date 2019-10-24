@@ -12,6 +12,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 
 	"sejastip.id/api"
+	"sejastip.id/api/entity"
 
 	"github.com/julienschmidt/httprouter"
 	"go.uber.org/zap"
@@ -78,7 +79,7 @@ func WithAuthentication(privateKey string) Middleware {
 			}
 
 			// get claims
-			claims := api.ResourceClaims{}
+			claims := entity.ResourceClaims{}
 			tokenString := authHeader[6:]
 			token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
 				return []byte(privateKey), nil

@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"sejastip.id/api"
+	"sejastip.id/api/entity"
 	"sejastip.id/api/handler"
 
 	"github.com/julienschmidt/httprouter"
@@ -40,7 +41,7 @@ func (h *UserHandler) RegisterHandler(r *httprouter.Router) error {
 func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request, _ httprouter.Params) error {
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
-	var user api.User
+	var user entity.User
 	if err := decoder.Decode(&user); err != nil {
 		api.Error(w, err)
 		return err

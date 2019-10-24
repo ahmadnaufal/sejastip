@@ -8,6 +8,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"sejastip.id/api"
+	"sejastip.id/api/entity"
 )
 
 type mysqlUser struct {
@@ -21,7 +22,7 @@ func NewMysqlUser(db *sql.DB) api.UserRepository {
 }
 
 // CreateUser inserts a newly registered user data into our mysql repository
-func (m *mysqlUser) CreateUser(ctx context.Context, user *api.User) error {
+func (m *mysqlUser) CreateUser(ctx context.Context, user *entity.User) error {
 	now := time.Now()
 	user.CreatedAt = now
 	user.UpdatedAt = now
@@ -51,7 +52,7 @@ func (m *mysqlUser) CreateUser(ctx context.Context, user *api.User) error {
 }
 
 // GetUsers fetches registered users' data from our mysql repository
-func (m *mysqlUser) GetUsers(ctx context.Context, limit, offset int) ([]api.User, int64, error) {
+func (m *mysqlUser) GetUsers(ctx context.Context, limit, offset int) ([]entity.User, int64, error) {
 	var count int64
 	err := m.db.GetContext(ctx, &count, `SELECT COUNT(id) FROM users`)
 	if err != nil {
@@ -64,18 +65,18 @@ func (m *mysqlUser) GetUsers(ctx context.Context, limit, offset int) ([]api.User
 		ORDER BY updated_at DESC
 		LIMIT ?, ?
 	`
-	results := []api.User{}
+	results := []entity.User{}
 	err = m.db.SelectContext(ctx, &results, query, offset, limit)
 	return results, count, err
 }
 
 // GetUser fetch a user data by its ID
-func (m *mysqlUser) GetUser(ctx context.Context, ID int64) (*api.User, error) {
+func (m *mysqlUser) GetUser(ctx context.Context, ID int64) (*entity.User, error) {
 	query := `
 		SELECT * FROM users
 		WHERE id = ?
 	`
-	result := &api.User{}
+	result := &entity.User{}
 	err := m.db.GetContext(ctx, result, query, ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -86,7 +87,7 @@ func (m *mysqlUser) GetUser(ctx context.Context, ID int64) (*api.User, error) {
 }
 
 // UpdateUser updates a user's data row selected by its ID with new provided data
-func (m *mysqlUser) UpdateUser(ctx context.Context, ID int64, user *api.User) error {
+func (m *mysqlUser) UpdateUser(ctx context.Context, ID int64, user *entity.User) error {
 	now := time.Now()
 	user.UpdatedAt = now
 
@@ -125,13 +126,13 @@ func (m *mysqlUser) UpdateUser(ctx context.Context, ID int64, user *api.User) er
 }
 
 // GetUserByEmail fetches a user having the provided email
-func (m *mysqlUser) GetUserByEmail(ctx context.Context, email string) (*api.User, error) {
+func (m *mysqlUser) GetUserByEmail(ctx context.Context, email string) (*entity.User, error) {
 	query := `
 		SELECT * FROM users
 		WHERE email = ?
 		LIMIT 1
 	`
-	var result api.User
+	var result entity.User
 	err := m.db.GetContext(ctx, &result, query, email)
 	if err == sql.ErrNoRows {
 		return nil, api.ErrNotFound

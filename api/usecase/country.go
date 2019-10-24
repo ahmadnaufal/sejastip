@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"sejastip.id/api/entity"
 	"sejastip.id/api/storage"
 
 	"github.com/pkg/errors"
@@ -23,7 +24,7 @@ func NewCountryUsecase(pvd *CountryProvider) api.CountryUsecase {
 	return &countryUsecase{pvd}
 }
 
-func (u *countryUsecase) CreateCountry(ctx context.Context, country *api.Country) error {
+func (u *countryUsecase) CreateCountry(ctx context.Context, country *entity.Country) error {
 	err := u.CountryProvider.CountryRepo.CreateCountry(ctx, country)
 	if err != nil {
 		return errors.Wrap(err, "error in creating country")
@@ -32,7 +33,7 @@ func (u *countryUsecase) CreateCountry(ctx context.Context, country *api.Country
 	return nil
 }
 
-func (u *countryUsecase) GetCountries(ctx context.Context, limit, offset int) ([]api.Country, int64, error) {
+func (u *countryUsecase) GetCountries(ctx context.Context, limit, offset int) ([]entity.Country, int64, error) {
 	countries, count, err := u.CountryProvider.CountryRepo.GetCountries(ctx, limit, offset)
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "error in getting all countries")
@@ -40,7 +41,7 @@ func (u *countryUsecase) GetCountries(ctx context.Context, limit, offset int) ([
 	return countries, count, nil
 }
 
-func (u *countryUsecase) GetCountry(ctx context.Context, ID int64) (*api.Country, error) {
+func (u *countryUsecase) GetCountry(ctx context.Context, ID int64) (*entity.Country, error) {
 	country, err := u.CountryProvider.CountryRepo.GetCountry(ctx, ID)
 	if err != nil {
 		return nil, errors.Wrap(err, "error in getting a country with ID")

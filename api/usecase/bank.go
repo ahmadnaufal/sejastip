@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 
+	"sejastip.id/api/entity"
 	"sejastip.id/api/storage"
 
 	"github.com/pkg/errors"
@@ -22,7 +23,7 @@ func NewBankUsecase(pvd *BankProvider) api.BankUsecase {
 	return &bankUsecase{pvd}
 }
 
-func (u *bankUsecase) CreateBank(ctx context.Context, bank *api.Bank) error {
+func (u *bankUsecase) CreateBank(ctx context.Context, bank *entity.Bank) error {
 	err := u.BankProvider.BankRepo.CreateBank(ctx, bank)
 	if err != nil {
 		return errors.Wrap(err, "error in creating bank")
@@ -31,7 +32,7 @@ func (u *bankUsecase) CreateBank(ctx context.Context, bank *api.Bank) error {
 	return nil
 }
 
-func (u *bankUsecase) GetBanks(ctx context.Context, limit, offset int) ([]api.Bank, int64, error) {
+func (u *bankUsecase) GetBanks(ctx context.Context, limit, offset int) ([]entity.Bank, int64, error) {
 	banks, count, err := u.BankProvider.BankRepo.GetBanks(ctx, limit, offset)
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "error in getting all banks")

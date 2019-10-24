@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 	"sejastip.id/api"
+	"sejastip.id/api/entity"
 )
 
 // UserProvider is a wrapper of dependencies used by the implementation of UserUsecase
@@ -24,7 +25,7 @@ func NewUserUsecase(pvd *UserProvider) api.UserUsecase {
 	return &userUsecase{pvd}
 }
 
-func (u *userUsecase) Register(ctx context.Context, user *api.User) (*api.UserPublic, error) {
+func (u *userUsecase) Register(ctx context.Context, user *entity.User) (*entity.UserPublic, error) {
 	user.Normalize()
 	if err := user.Validate(); err != nil {
 		return nil, errors.Wrap(err, "Validate user failed")
@@ -62,7 +63,7 @@ func (u *userUsecase) Register(ctx context.Context, user *api.User) (*api.UserPu
 }
 
 // GetUser get a single user by ID
-func (u *userUsecase) GetUser(ctx context.Context, ID int64) (*api.UserPublic, error) {
+func (u *userUsecase) GetUser(ctx context.Context, ID int64) (*entity.UserPublic, error) {
 	user, err := u.UserProvider.UserRepository.GetUser(ctx, ID)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error fetching user")
