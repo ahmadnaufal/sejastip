@@ -24,3 +24,5 @@ sejastip-api
 
 # Exclude public directory
 public/*
+
+app.yaml

@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -73,7 +72,6 @@ func WithAuthentication(privateKey string) Middleware {
 			authHeader := r.Header.Get("Authorization")
 			match, _ := regexp.MatchString("^Token ", authHeader)
 			if !match {
-				log.Println("Unaut coj")
 				api.Error(w, api.ErrUnauthorized)
 				return api.ErrUnauthorized
 			}
@@ -85,7 +83,6 @@ func WithAuthentication(privateKey string) Middleware {
 				return []byte(privateKey), nil
 			})
 			if err != nil || !token.Valid {
-				log.Println("Unaut yok", err)
 				api.Error(w, api.ErrUnauthorized)
 				return api.ErrUnauthorized
 			}

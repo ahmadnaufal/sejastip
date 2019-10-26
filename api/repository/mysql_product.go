@@ -4,8 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
-	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -65,12 +63,11 @@ func (m *mysqlProduct) GetProductsByUser(ctx context.Context, userID int64, limi
 
 func (m *mysqlProduct) GetProductsByFilter(ctx context.Context, filter entity.DynamicFilter, limit, offset int) ([]entity.Product, int64, error) {
 	filteredQueries := buildDynamicQuery(filter)
-	log.Println(filteredQueries, filter)
 	countQuery, countArgs := sqlm.Build(
 		"SELECT COUNT(id) FROM products",
 		"WHERE", sqlm.And(filteredQueries),
 	)
-	log.Println(countQuery, countArgs)
+
 	var count int64
 	err := m.db.GetContext(ctx, &count, countQuery, countArgs...)
 	if err != nil {
@@ -83,7 +80,6 @@ func (m *mysqlProduct) GetProductsByFilter(ctx context.Context, filter entity.Dy
 		"ORDER BY updated_at DESC",
 		sqlm.Exp("LIMIT", sqlm.P(offset), ",", sqlm.P(limit)),
 	)
-	log.Println(query)
 	results := []entity.Product{}
 	err = m.db.SelectContext(ctx, &results, query, args...)
 	return results, count, err
@@ -106,12 +102,11 @@ func buildDynamicQuery(filter entity.DynamicFilter) []interface{} {
 	// to handle no filter
 	filters = append(filters, sqlm.Exp("1=1"))
 	for key, val := range filter {
-		lowerKey := strings.ToLower(key)
-		if _, ok := allowedFilters[lowerKey]; ok {
-			if lowerKey == "q" {
+		if _, ok := allowedFilters[key]; ok {
+			if key == "q" {
 				filters = append(filters, sqlm.Exp("title", "LIKE", sqlm.P(fmt.Sprintf("%%%s%%", val))))
 			} else {
-				filters = append(filters, sqlm.Exp(lowerKey, "=", sqlm.P(val)))
+				filters = append(filters, sqlm.Exp(key, "=", sqlm.P(val)))
 			}
 		}
 	}

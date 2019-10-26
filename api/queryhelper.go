@@ -1,10 +1,10 @@
 package api
 
 import (
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"sejastip.id/api/entity"
 )
@@ -32,10 +32,17 @@ type QueryHelper struct {
 
 // GetFilters build a dynamic filter by iterating through the query parameters
 func (q *QueryHelper) GetFilters() entity.DynamicFilter {
+	reservedParams := map[string]struct{}{
+		"limit":  struct{}{},
+		"offset": struct{}{},
+	}
+
 	filters := entity.DynamicFilter{}
-	log.Println(q.uv)
 	for key, val := range q.uv {
-		filters[key] = val[0]
+		lowerKey := strings.ToLower(key)
+		if _, ok := reservedParams[lowerKey]; !ok {
+			filters[lowerKey] = val[0]
+		}
 	}
 
 	return filters

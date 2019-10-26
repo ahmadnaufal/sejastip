@@ -2,7 +2,6 @@ package util
 
 import (
 	"encoding/base64"
-	"log"
 	"mime"
 	"regexp"
 	"strings"
@@ -37,7 +36,6 @@ func DecodeUploadedBase64File(encodedString string) ([]byte, string, error) {
 
 	// decode the base64 to get the file contents
 	encodedContent := encodedString[strings.Index(encodedString, ",")+1:]
-	log.Println(extensions, mimeType, encodedContent)
 	decoded, err := base64.StdEncoding.DecodeString(encodedContent)
 	if err != nil {
 		return nil, "", err
