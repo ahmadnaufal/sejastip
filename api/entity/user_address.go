@@ -22,3 +22,20 @@ type UserAddressPublic struct {
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
+
+func (u *UserAddress) ConvertToPublic() UserAddressPublic {
+	return UserAddressPublic{
+		ID:          u.ID,
+		Address:     u.Address,
+		Phone:       u.Phone,
+		AddressName: u.AddressName,
+		CreatedAt:   u.CreatedAt,
+		UpdatedAt:   u.UpdatedAt,
+	}
+}
+
+type UserAddressForm struct {
+	Address     string `json:"address"`
+	Phone       string `json:"phone"`
+	AddressName string `json:"address_name"`
+}

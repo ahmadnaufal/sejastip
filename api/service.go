@@ -42,7 +42,7 @@ type ProductRepository interface {
 // UserAddressRepository is a contract for structs implementing user address storage
 type UserAddressRepository interface {
 	CreateAddress(ctx context.Context, address *entity.UserAddress) error
-	GetUserAddresses(ctx context.Context, userID int64, limit, offset int) ([]entity.UserAddress, error)
+	GetUserAddresses(ctx context.Context, userID int64, limit, offset int) ([]entity.UserAddress, int64, error)
 	GetUserAddress(ctx context.Context, ID int64) (*entity.UserAddress, error)
 	UpdateAddress(ctx context.Context, ID int64, newAddress *entity.UserAddress) error
 }
