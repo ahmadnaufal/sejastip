@@ -31,12 +31,23 @@ type Product struct {
 	DeletedAt   *time.Time `db:"deleted_at"`
 }
 
+type ProductForm struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Price       uint   `json:"price"`
+	CountryID   int64  `json:"country_id"`
+	ImageFile   string `json:"image_file"`
+	FromDate    string `json:"from_date"`
+	ToDate      string `json:"to_date"`
+}
+
 func (p *Product) ConvertToPublic(c *Country, u *User) ProductPublic {
 	return ProductPublic{
 		ID:          p.ID,
 		Title:       p.Title,
 		Description: p.Description,
 		Price:       p.Price,
+		Image:       p.Image,
 		Seller:      u.ConvertToPublic(),
 		Country:     c,
 		Status:      mapProductStatusToString[p.Status],
@@ -52,6 +63,7 @@ type ProductPublic struct {
 	Title       string      `json:"title"`
 	Description string      `json:"description"`
 	Price       uint        `json:"price"`
+	Image       string      `json:"image"`
 	Seller      *UserPublic `json:"seller,omitempty"`
 	Country     *Country    `json:"country,omitempty"`
 	Status      string      `json:"status"`

@@ -9,21 +9,6 @@ import (
 	"sejastip.id/api/entity"
 )
 
-type PaginationMeta struct {
-	Limit  int `json:"limit"`
-	Offset int `json:"offset"`
-	Total  int `json:"total"`
-}
-
-// NewPaginationMeta to create pagination meta
-func NewPaginationMeta(limit, offset, total int) PaginationMeta {
-	return PaginationMeta{
-		Limit:  limit,
-		Offset: offset,
-		Total:  total,
-	}
-}
-
 // QueryHelper represent helper to get query url data
 type QueryHelper struct {
 	r  *http.Request

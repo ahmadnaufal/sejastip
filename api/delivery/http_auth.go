@@ -52,6 +52,6 @@ func (h *AuthHandler) Authenticate(w http.ResponseWriter, r *http.Request, _ htt
 		return err
 	}
 
-	api.OK(w, authResponse, nil)
+	api.OK(w, authResponse, "successfully logged in")
 	return nil
 }

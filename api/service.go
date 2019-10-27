@@ -80,6 +80,7 @@ type ProductUsecase interface {
 	GetProduct(ctx context.Context, ID int64) (*entity.ProductPublic, error)
 	UpdateProduct(ctx context.Context, ID int64, newProduct *entity.Product) (*entity.ProductPublic, error)
 	DeleteProduct(ctx context.Context, ID int64) error
+	UploadProductImage(ctx context.Context, filename string, content []byte) (string, error)
 }
 
 // UserAddressUsecase is a contract for structs implementing user address usecase

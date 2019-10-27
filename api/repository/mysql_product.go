@@ -58,7 +58,22 @@ func (m *mysqlProduct) CreateProduct(ctx context.Context, product *entity.Produc
 }
 
 func (m *mysqlProduct) GetProductsByUser(ctx context.Context, userID int64, limit, offset int) ([]entity.Product, int64, error) {
-	return nil, 0, nil
+	var count int64
+	err := m.db.GetContext(ctx, &count, `SELECT COUNT(id) FROM products WHERE seller_id=?`, userID)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// prepare query
+	query := `
+		SELECT * FROM products
+		WHERE seller_id=? AND deleted_at IS NULL
+		ORDER BY updated_at DESC
+		LIMIT ?, ?
+	`
+	results := []entity.Product{}
+	err = m.db.SelectContext(ctx, &results, query, userID, offset, limit)
+	return results, count, err
 }
 
 func (m *mysqlProduct) GetProductsByFilter(ctx context.Context, filter entity.DynamicFilter, limit, offset int) ([]entity.Product, int64, error) {
@@ -86,21 +101,93 @@ func (m *mysqlProduct) GetProductsByFilter(ctx context.Context, filter entity.Dy
 }
 
 func (m *mysqlProduct) GetProduct(ctx context.Context, ID int64) (*entity.Product, error) {
-	return nil, nil
+	query := `
+		SELECT * FROM products
+		WHERE id = ?
+		AND deleted_at IS NULL
+	`
+	result := &entity.Product{}
+	err := m.db.GetContext(ctx, result, query, ID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, api.ErrNotFound
+		}
+	}
+	return result, err
 }
 
 func (m *mysqlProduct) UpdateProduct(ctx context.Context, ID int64, newProduct *entity.Product) error {
+	now := time.Now()
+	newProduct.UpdatedAt = now
+
+	query := `
+		UPDATE products SET
+		title = ?, description = ?, price = ?, country_id = ?, status = ?,
+		from_date = ?, to_date = ?, updated_at = ?
+		WHERE id = ?
+	`
+	prep, err := m.db.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	res, err := prep.ExecContext(ctx,
+		newProduct.Title, newProduct.Description, newProduct.Price,
+		newProduct.CountryID, newProduct.Status, newProduct.FromDate,
+		newProduct.ToDate, newProduct.UpdatedAt,
+		ID,
+	)
+	if err != nil {
+		return err
+	}
+
+	affectedRows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affectedRows != 1 {
+		return api.SejastipError{
+			Message: fmt.Sprintf("Unexpected behavior detected when updating product (total rows affected: %d)", affectedRows),
+		}
+	}
+
 	return nil
 }
 
 func (m *mysqlProduct) DeleteProduct(ctx context.Context, ID int64) error {
+	now := time.Now()
+	query := `
+		UPDATE products SET
+		deleted_at = ?
+		WHERE id = ?
+	`
+	prep, err := m.db.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	res, err := prep.ExecContext(ctx, now, ID)
+	if err != nil {
+		return err
+	}
+
+	affectedRows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affectedRows != 1 {
+		return api.SejastipError{
+			Message: fmt.Sprintf("Unexpected behavior detected when deleting product (total rows affected: %d)", affectedRows),
+		}
+	}
+
 	return nil
 }
 
 func buildDynamicQuery(filter entity.DynamicFilter) []interface{} {
 	var filters []interface{}
 	// to handle no filter
-	filters = append(filters, sqlm.Exp("1=1"))
+	filters = append(filters, sqlm.Exp("deleted_at IS NULL"))
 	for key, val := range filter {
 		if _, ok := allowedFilters[key]; ok {
 			if key == "q" {

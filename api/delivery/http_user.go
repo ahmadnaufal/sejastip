@@ -54,7 +54,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request, _ httprou
 		return err
 	}
 
-	api.OK(w, publicUser, nil)
+	api.OK(w, publicUser, "")
 	return nil
 }
 
@@ -75,7 +75,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request, p httprout
 		return err
 	}
 
-	api.OK(w, user, nil)
+	api.OK(w, user, "")
 	return nil
 }
 
@@ -91,6 +91,6 @@ func (h *UserHandler) GetMe(w http.ResponseWriter, r *http.Request, _ httprouter
 		return err
 	}
 
-	api.OK(w, user, nil)
+	api.OK(w, user, "")
 	return nil
 }

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -27,12 +28,19 @@ func NewProductUsecase(pvd *ProductProvider) api.ProductUsecase {
 }
 
 func (uc *productUsecase) CreateProduct(ctx context.Context, product *entity.Product) (*entity.ProductPublic, error) {
-	err := uc.Provider.ProductRepo.CreateProduct(ctx, product)
+	_, err := uc.Provider.CountryRepo.GetCountry(ctx, product.CountryID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = uc.Provider.ProductRepo.CreateProduct(ctx, product)
 	if err != nil {
 		return nil, errors.Wrap(err, "error in creating product")
 	}
 
-	productPublic := product.ConvertToPublic(nil, nil)
+	user, country, _ := uc.fetchProductAdditionalInfo(ctx, *product)
+
+	productPublic := product.ConvertToPublic(country, user)
 	return &productPublic, nil
 }
 
@@ -44,14 +52,9 @@ func (uc *productUsecase) GetProductsByFilter(ctx context.Context, filter entity
 
 	publicProducts := []entity.ProductPublic{}
 	for _, product := range products {
-		user, err := uc.Provider.UserRepo.GetUser(ctx, product.SellerID)
+		user, country, err := uc.fetchProductAdditionalInfo(ctx, product)
 		if err != nil {
-			return nil, 0, errors.Wrap(err, "error in fetching user details from product")
-		}
-
-		country, err := uc.Provider.CountryRepo.GetCountry(ctx, product.CountryID)
-		if err != nil {
-			return nil, 0, errors.Wrap(err, "error in fetching country details from product")
+			return nil, count, err
 		}
 
 		publicProducts = append(publicProducts, product.ConvertToPublic(country, user))
@@ -61,13 +64,52 @@ func (uc *productUsecase) GetProductsByFilter(ctx context.Context, filter entity
 }
 
 func (uc *productUsecase) GetProduct(ctx context.Context, ID int64) (*entity.ProductPublic, error) {
-	return nil, nil
+	product, err := uc.Provider.ProductRepo.GetProduct(ctx, ID)
+	if err != nil {
+		return nil, errors.Wrap(err, "error in fetching product")
+	}
+
+	user, country, err := uc.fetchProductAdditionalInfo(ctx, *product)
+	if err != nil {
+		return nil, err
+	}
+
+	publicProduct := product.ConvertToPublic(country, user)
+	return &publicProduct, nil
 }
 
 func (uc *productUsecase) UpdateProduct(ctx context.Context, ID int64, newProduct *entity.Product) (*entity.ProductPublic, error) {
-	return nil, nil
+	err := uc.Provider.ProductRepo.UpdateProduct(ctx, ID, newProduct)
+	if err != nil {
+		return nil, errors.Wrap(err, "error in updating product")
+	}
+
+	return uc.GetProduct(ctx, ID)
 }
 
 func (uc *productUsecase) DeleteProduct(ctx context.Context, ID int64) error {
+	err := uc.Provider.ProductRepo.DeleteProduct(ctx, ID)
+	if err != nil {
+		return errors.Wrap(err, "error in deleting product")
+	}
+
 	return nil
+}
+
+func (u *productUsecase) UploadProductImage(ctx context.Context, filename string, content []byte) (string, error) {
+	return u.Provider.Storage.Store("products/"+strings.ToLower(filename), content)
+}
+
+func (uc *productUsecase) fetchProductAdditionalInfo(ctx context.Context, product entity.Product) (*entity.User, *entity.Country, error) {
+	user, err := uc.Provider.UserRepo.GetUser(ctx, product.SellerID)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "error in fetching user details from product")
+	}
+
+	country, err := uc.Provider.CountryRepo.GetCountry(ctx, product.CountryID)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "error in fetching country details from product")
+	}
+
+	return user, country, nil
 }

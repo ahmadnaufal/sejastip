@@ -72,7 +72,7 @@ func (h *BankHandler) CreateBank(w http.ResponseWriter, r *http.Request, _ httpr
 		return err
 	}
 
-	api.OK(w, bank, nil)
+	api.OK(w, bank, "")
 	return nil
 }
 
@@ -89,7 +89,7 @@ func (h *BankHandler) GetBanks(w http.ResponseWriter, r *http.Request, _ httprou
 		return errors.Wrap(err, "error getting banks")
 	}
 
-	meta := api.NewPaginationMeta(limit, offset, int(total))
-	api.OK(w, banks, meta)
+	meta := api.NewMetaPagination(http.StatusOK, limit, offset, int(total))
+	api.OKWithMeta(w, banks, "", meta)
 	return nil
 }

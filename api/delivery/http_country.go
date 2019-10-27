@@ -74,7 +74,7 @@ func (h *CountryHandler) CreateCountry(w http.ResponseWriter, r *http.Request, _
 		return err
 	}
 
-	api.OK(w, country, nil)
+	api.Created(w, country, "")
 	return nil
 }
 
@@ -91,8 +91,8 @@ func (h *CountryHandler) GetCountries(w http.ResponseWriter, r *http.Request, _ 
 		return errors.Wrap(err, "error getting countries")
 	}
 
-	meta := api.NewPaginationMeta(limit, offset, int(total))
-	api.OK(w, countries, meta)
+	meta := api.NewMetaPagination(http.StatusOK, limit, offset, int(total))
+	api.OKWithMeta(w, countries, "", meta)
 	return nil
 }
 
@@ -112,6 +112,6 @@ func (h *CountryHandler) GetCountry(w http.ResponseWriter, r *http.Request, p ht
 		return errors.Wrap(err, "error getting a country")
 	}
 
-	api.OK(w, country, nil)
+	api.OK(w, country, "")
 	return nil
 }
