@@ -32,6 +32,13 @@ var (
 		ErrorCode:  401,
 		HTTPStatus: http.StatusUnauthorized,
 	}
+
+	// ErrForbidden represents
+	ErrForbidden = SejastipError{
+		Message:    "Forbidden to access the resource",
+		ErrorCode:  403,
+		HTTPStatus: http.StatusForbidden,
+	}
 )
 
 // SejastipError defines our custom error
