@@ -27,7 +27,4 @@
 # ignore env file
 .env
 
-# ignore key files
-*.json
-
 public/*
