@@ -42,7 +42,9 @@ func (h *TransactionHandler) CreateTransaction(w http.ResponseWriter, r *http.Re
 	}
 
 	ctx := r.Context()
-	transaction, err := h.transactionUsecase.CreateTransaction(ctx, &transactionForm)
+	meta := api.MetaFromContext(ctx)
+
+	transaction, err := h.transactionUsecase.CreateTransaction(ctx, &transactionForm, meta.ID)
 	if err != nil {
 		api.Error(w, err)
 		return err

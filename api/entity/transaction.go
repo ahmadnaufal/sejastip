@@ -1,6 +1,26 @@
 package entity
 
-import "time"
+import (
+	"time"
+
+	"github.com/pkg/errors"
+)
+
+const (
+	TransactionStatusInit = iota
+	TransactionStatusPaid
+	TransactionStatusFinished
+	TransactionStatusRejected
+	TransactionStatusExpired
+)
+
+var mapStatusToString = map[int]string{
+	TransactionStatusInit:     "placed",
+	TransactionStatusPaid:     "paid",
+	TransactionStatusFinished: "finished",
+	TransactionStatusRejected: "rejected",
+	TransactionStatusExpired:  "expired",
+}
 
 type Transaction struct {
 	ID             int64      `db:"id"`
@@ -16,6 +36,10 @@ type Transaction struct {
 	FinishedAt     *time.Time `db:"finished_at"`
 	CreatedAt      time.Time  `db:"created_at"`
 	UpdatedAt      time.Time  `db:"updated_at"`
+}
+
+func (t *Transaction) GetStatusString() string {
+	return mapStatusToString[t.Status]
 }
 
 type TransactionPublic struct {
@@ -38,4 +62,20 @@ type TransactionForm struct {
 	Quantity  uint   `json:"quantity"`
 	AddressID int64  `json:"address_id"`
 	Notes     string `json:"notes"`
+}
+
+func (f *TransactionForm) Validate() error {
+	if f.ProductID < 1 {
+		return errors.New("Product is not selected yet")
+	}
+
+	if f.Quantity < 1 {
+		return errors.New("Ordered quantity must be more than 0")
+	}
+
+	if f.AddressID < 1 {
+		return errors.New("Order address is not selected yet")
+	}
+
+	return nil
 }
