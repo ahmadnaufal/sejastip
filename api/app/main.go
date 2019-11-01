@@ -81,7 +81,7 @@ func NewCloudSqlConnection(c *Config) (*sql.DB, error) {
 	cfg.DBName = c.Database.Name
 	db, err := mysql.DialCfg(cfg)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("error connecting to cloudsql: ", err)
 	}
 
 	db.SetMaxOpenConns(c.Database.Pool)
@@ -101,7 +101,7 @@ func main() {
 	}
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("error connecting to mysql server: ", err)
 	}
 
 	userRepo := repository.NewMysqlUser(db)
