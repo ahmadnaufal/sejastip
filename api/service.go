@@ -90,3 +90,10 @@ type UserAddressUsecase interface {
 	GetUserAddress(ctx context.Context, ID int64) (*entity.UserAddressPublic, error)
 	UpdateAddress(ctx context.Context, ID int64, newAddress *entity.UserAddress) (*entity.UserAddressPublic, error)
 }
+
+// TransactionUsecase is a contract for structs implementing transactions usecase
+type TransactionUsecase interface {
+	GetTransactions(ctx context.Context, filter entity.DynamicFilter, limit, offset int) ([]entity.TransactionPublic, int64, error)
+	GetTransaction(ctx context.Context, transactionID int64) (*entity.TransactionPublic, error)
+	CreateTransaction(ctx context.Context, transactionForm *entity.TransactionForm) (*entity.TransactionPublic, error)
+}
