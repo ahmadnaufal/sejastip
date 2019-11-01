@@ -47,6 +47,13 @@ type UserAddressRepository interface {
 	UpdateAddress(ctx context.Context, ID int64, newAddress *entity.UserAddress) error
 }
 
+// TransactionRepository is a contract for structs implementing transaction storage
+type TransactionRepository interface {
+	GetTransactions(ctx context.Context, filter entity.DynamicFilter, limit, offset int) ([]entity.Transaction, int64, error)
+	GetTransaction(ctx context.Context, transactionID int64) (*entity.Transaction, error)
+	CreateTransaction(ctx context.Context, transaction *entity.Transaction) error
+}
+
 // UserUsecase is a contract for usecases related to users
 type UserUsecase interface {
 	Register(ctx context.Context, user *entity.User) (*entity.UserPublic, error)
@@ -93,7 +100,7 @@ type UserAddressUsecase interface {
 
 // TransactionUsecase is a contract for structs implementing transactions usecase
 type TransactionUsecase interface {
-	GetTransactions(ctx context.Context, filter entity.DynamicFilter, limit, offset int) ([]entity.TransactionPublic, int64, error)
+	GetTransactions(ctx context.Context, filter entity.DynamicFilter, limit, offset int) ([]*entity.TransactionPublic, int64, error)
 	GetTransaction(ctx context.Context, transactionID int64) (*entity.TransactionPublic, error)
-	CreateTransaction(ctx context.Context, transactionForm *entity.TransactionForm) (*entity.TransactionPublic, error)
+	CreateTransaction(ctx context.Context, transactionForm *entity.TransactionForm, userID int64) (*entity.TransactionPublic, error)
 }
