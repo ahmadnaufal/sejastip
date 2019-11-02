@@ -59,7 +59,7 @@ func (m *mysqlBank) GetBanks(ctx context.Context, limit, offset int) ([]entity.B
 	// prepare query, default is ordered by name
 	query := `
 		SELECT * FROM banks
-		ORDER BY name DESC
+		ORDER BY name ASC
 		LIMIT ?, ?
 	`
 	results := []entity.Bank{}
