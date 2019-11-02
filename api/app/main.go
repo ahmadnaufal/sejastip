@@ -79,6 +79,7 @@ func NewMysqlConnection(c *Config) (*sql.DB, error) {
 func NewCloudSqlConnection(c *Config) (*sql.DB, error) {
 	cfg := mysql.Cfg(c.Database.CloudSQLConnectionName, c.Database.User, c.Database.Password)
 	cfg.DBName = c.Database.Name
+	cfg.ParseTime = true
 	db, err := mysql.DialCfg(cfg)
 	if err != nil {
 		log.Fatal("error connecting to cloudsql: ", err)
