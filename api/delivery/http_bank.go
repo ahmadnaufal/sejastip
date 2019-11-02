@@ -8,6 +8,7 @@ import (
 	"sejastip.id/api/entity"
 	"sejastip.id/api/util"
 
+	"github.com/gosimple/slug"
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/errors"
 	"sejastip.id/api"
@@ -55,7 +56,7 @@ func (h *BankHandler) CreateBank(w http.ResponseWriter, r *http.Request, _ httpr
 	ctx := r.Context()
 
 	// upload file
-	filename := fmt.Sprintf("%s%s", bankForm.Name, extension)
+	filename := fmt.Sprintf("%s%s", slug.Make(bankForm.Name), extension)
 	filePath, err := h.uc.UploadBankImage(ctx, filename, file)
 	if err != nil {
 		api.Error(w, err)
