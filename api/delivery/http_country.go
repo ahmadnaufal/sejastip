@@ -9,6 +9,7 @@ import (
 	"sejastip.id/api/entity"
 	"sejastip.id/api/util"
 
+	"github.com/gosimple/slug"
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/errors"
 	"sejastip.id/api"
@@ -57,7 +58,7 @@ func (h *CountryHandler) CreateCountry(w http.ResponseWriter, r *http.Request, _
 	ctx := r.Context()
 
 	// upload file
-	filename := fmt.Sprintf("%s%s", countryForm.Name, extension)
+	filename := fmt.Sprintf("%s%s", slug.Make(countryForm.Name), extension)
 	filePath, err := h.uc.UploadCountryImage(ctx, filename, file)
 	if err != nil {
 		api.Error(w, err)
