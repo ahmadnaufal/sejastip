@@ -32,6 +32,7 @@ func (h *CountryHandler) RegisterHandler(r *httprouter.Router) error {
 	r.POST("/countries", handler.Decorate(h.CreateCountry, handler.AppAuth...))
 	r.GET("/countries", handler.Decorate(h.GetCountries, handler.AppAuth...))
 	r.GET("/countries/:id", handler.Decorate(h.GetCountry, handler.AppAuth...))
+	r.POST("/bulk-countries", handler.Decorate(h.BulkCreateCountries, handler.AppAuth...))
 
 	return nil
 }
@@ -114,5 +115,54 @@ func (h *CountryHandler) GetCountry(w http.ResponseWriter, r *http.Request, p ht
 	}
 
 	api.OK(w, country, "")
+	return nil
+}
+
+func (h *CountryHandler) BulkCreateCountries(w http.ResponseWriter, r *http.Request, p httprouter.Params) error {
+	decoder := json.NewDecoder(r.Body)
+	var countryForms []entity.CountryForm
+	if err := decoder.Decode(&countryForms); err != nil {
+		api.Error(w, err)
+		return err
+	}
+
+	ctx := r.Context()
+	countries := []entity.Country{}
+	for i, form := range countryForms {
+		filePath := ""
+		if form.ImageFile != "" {
+			file, extension, err := util.DecodeUploadedBase64File(form.ImageFile)
+			if err != nil {
+				err = api.SejastipError{
+					Message:    fmt.Sprintf("Error parsing file for index %d: %v", i, err),
+					ErrorCode:  400,
+					HTTPStatus: http.StatusBadRequest,
+				}
+				api.Error(w, err)
+				return err
+			}
+
+			// upload file
+			filename := fmt.Sprintf("%s%s", slug.Make(form.Name), extension)
+			filePath, err = h.uc.UploadCountryImage(ctx, filename, file)
+			if err != nil {
+				api.Error(w, err)
+				return errors.Wrap(err, "error in uploading file")
+			}
+		}
+
+		countries = append(countries, entity.Country{
+			Name:  form.Name,
+			Image: filePath,
+		})
+	}
+
+	err := h.uc.BulkCreateCountries(ctx, countries)
+	if err != nil {
+		api.Error(w, err)
+		return err
+	}
+
+	api.Created(w, nil, "bulk country inserted successfully")
 	return nil
 }

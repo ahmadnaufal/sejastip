@@ -52,3 +52,12 @@ func (u *countryUsecase) GetCountry(ctx context.Context, ID int64) (*entity.Coun
 func (u *countryUsecase) UploadCountryImage(ctx context.Context, filename string, content []byte) (string, error) {
 	return u.CountryProvider.Storage.Store("countries/"+strings.ToLower(filename), content)
 }
+
+func (u *countryUsecase) BulkCreateCountries(ctx context.Context, countries []entity.Country) error {
+	err := u.CountryProvider.CountryRepo.BulkCreateCountries(ctx, countries)
+	if err != nil {
+		return errors.Wrap(err, "error in creating countries")
+	}
+
+	return nil
+}
