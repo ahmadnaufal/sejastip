@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_10_21_203339) do
+ActiveRecord::Schema.define(version: 2019_10_27_181926) do
 
   create_table "banks", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "name", limit: 30, null: false
@@ -26,6 +26,18 @@ ActiveRecord::Schema.define(version: 2019_10_21_203339) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_countries_on_name"
+  end
+
+  create_table "invoices", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.bigint "transaction_id", null: false
+    t.string "invoice_code", null: false
+    t.integer "coded_price", null: false
+    t.integer "status", limit: 1, default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["invoice_code"], name: "index_invoices_on_invoice_code"
+    t.index ["status"], name: "index_invoices_on_status"
+    t.index ["transaction_id"], name: "index_invoices_on_transaction_id"
   end
 
   create_table "products", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
@@ -48,6 +60,25 @@ ActiveRecord::Schema.define(version: 2019_10_21_203339) do
     t.index ["title", "deleted_at"], name: "index_products_on_title_and_deleted_at"
     t.index ["title", "seller_id", "deleted_at"], name: "index_products_on_title_and_seller_id_and_deleted_at"
     t.index ["title"], name: "index_products_on_title"
+  end
+
+  create_table "transactions", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.bigint "product_id", null: false
+    t.bigint "buyer_id", null: false
+    t.bigint "seller_id", null: false
+    t.bigint "buyer_address_id", null: false
+    t.integer "quantity", limit: 2, default: 1, unsigned: true
+    t.string "notes", limit: 200, default: ""
+    t.integer "total_price", null: false, unsigned: true
+    t.integer "status", limit: 1, default: 0, unsigned: true
+    t.datetime "paid_at"
+    t.datetime "finished_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["buyer_address_id"], name: "index_transactions_on_buyer_address_id"
+    t.index ["buyer_id"], name: "index_transactions_on_buyer_id"
+    t.index ["product_id"], name: "index_transactions_on_product_id"
+    t.index ["seller_id"], name: "index_transactions_on_seller_id"
   end
 
   create_table "user_addresses", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
