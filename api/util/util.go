@@ -14,9 +14,13 @@ import (
 func DecodeUploadedBase64File(encodedString string) ([]byte, string, error) {
 	// first, check if the encodedString is a valid representation of a
 	// base64-encoded file
-	match, _ := regexp.MatchString("^data:([a-zA-Z0-9]+\\/[a-zA-Z0-9-.+]+).*,.*$", encodedString)
+	match, err := regexp.MatchString("^data:([a-zA-Z0-9]+\\/[a-zA-Z0-9-.+]+).*,.*$", encodedString)
 	if !match {
-		return nil, "", errors.New("Unknown file uploaded")
+		if err != nil {
+			return nil, "", err
+		}
+
+		return nil, "", errors.New("Unknown file uploaded: file did not match regex")
 	}
 
 	// then, get the mimetype
