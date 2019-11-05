@@ -27,6 +27,7 @@ type CountryRepository interface {
 	CreateCountry(ctx context.Context, country *entity.Country) error
 	GetCountries(ctx context.Context, limit, offset int) ([]entity.Country, int64, error)
 	GetCountry(ctx context.Context, ID int64) (*entity.Country, error)
+	BulkCreateCountries(ctx context.Context, countries []entity.Country) error
 }
 
 // ProductRepository is a contract for structs implementing product storage
@@ -78,6 +79,7 @@ type CountryUsecase interface {
 	GetCountries(ctx context.Context, limit, offset int) ([]entity.Country, int64, error)
 	GetCountry(ctx context.Context, ID int64) (*entity.Country, error)
 	UploadCountryImage(ctx context.Context, filename string, content []byte) (string, error)
+	BulkCreateCountries(ctx context.Context, countries []entity.Country) error
 }
 
 // ProductUsecase is a contract for structs implementing product usecase

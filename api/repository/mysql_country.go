@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/shuoli84/sqlm"
+
 	"github.com/jmoiron/sqlx"
 	"sejastip.id/api"
 	"sejastip.id/api/entity"
@@ -35,6 +37,7 @@ func (m *mysqlCountry) CreateCountry(ctx context.Context, country *entity.Countr
 	if err != nil {
 		return err
 	}
+	defer prep.Close()
 
 	// execute query
 	res, err := prep.ExecContext(ctx,
@@ -80,4 +83,35 @@ func (m *mysqlCountry) GetCountry(ctx context.Context, ID int64) (*entity.Countr
 		return nil, api.ErrNotFound
 	}
 	return &result, err
+}
+
+// BulkCreateCountries inserts multiple countries data in a single operation
+func (m *mysqlCountry) BulkCreateCountries(ctx context.Context, countries []entity.Country) error {
+	expressions := []sqlm.Expression{}
+	now := time.Now()
+	for _, country := range countries {
+		tempCountry := country
+		tempCountry.CreatedAt = now
+		tempCountry.UpdatedAt = now
+
+		expression := sqlm.F("(1, 2)", sqlm.P(tempCountry.Name), sqlm.P(tempCountry.Image),
+			sqlm.P(tempCountry.CreatedAt), sqlm.P(tempCountry.UpdatedAt))
+		expressions = append(expressions, expression)
+	}
+
+	query, args := sqlm.Build(
+		"INSERT INTO countries",
+		"(name, image, created_at, updated_at)",
+		"VALUES",
+		sqlm.F("1, 2", expressions),
+	)
+	prep, err := m.db.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+	defer prep.Close()
+
+	// execute query
+	_, err = prep.ExecContext(ctx, args...)
+	return err
 }
