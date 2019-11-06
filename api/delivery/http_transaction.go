@@ -63,6 +63,13 @@ func (h *TransactionHandler) GetTransactions(w http.ResponseWriter, r *http.Requ
 	filters := helper.GetFilters()
 
 	ctx := r.Context()
+	reqMeta := api.MetaFromContext(ctx)
+	// get requesting user id
+	requestingUserID := strconv.FormatInt(reqMeta.ID, 10)
+	// by default: get all transactions by the user
+	filters["seller_id"] = requestingUserID
+	filters["buyer_id"] = requestingUserID
+
 	transactions, total, err := h.transactionUsecase.GetTransactions(ctx, filters, limit, offset)
 	if err != nil {
 		api.Error(w, err)

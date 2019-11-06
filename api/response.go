@@ -9,7 +9,7 @@ import (
 
 // ResponseBody is our default structure for API responses
 type ResponseBody struct {
-	Data    interface{} `json:"data,omitempty"`
+	Result  interface{} `json:"result,omitempty"`
 	Error   *ErrorBody  `json:"error,omitempty"`
 	Message string      `json:"message,omitempty"`
 	Meta    interface{} `json:"meta"`
@@ -46,7 +46,7 @@ type ErrorBody struct {
 // OK is a wrapper to return 200 OK responses
 func OK(w http.ResponseWriter, data interface{}, msg string) {
 	response := ResponseBody{
-		Data:    data,
+		Result:  data,
 		Message: msg,
 		Meta:    MetaInfo{http.StatusOK},
 	}
@@ -56,7 +56,7 @@ func OK(w http.ResponseWriter, data interface{}, msg string) {
 // OKWithMeta is a wrapper to return 200 OK responses with customized metadata
 func OKWithMeta(w http.ResponseWriter, data interface{}, msg string, meta interface{}) {
 	response := ResponseBody{
-		Data:    data,
+		Result:  data,
 		Message: msg,
 		Meta:    meta,
 	}
@@ -66,7 +66,7 @@ func OKWithMeta(w http.ResponseWriter, data interface{}, msg string, meta interf
 // Created is a wrapper to return 201 Created responses
 func Created(w http.ResponseWriter, data interface{}, msg string) {
 	response := ResponseBody{
-		Data:    data,
+		Result:  data,
 		Message: msg,
 		Meta:    MetaInfo{http.StatusCreated},
 	}

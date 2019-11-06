@@ -28,7 +28,11 @@ func NewUserUsecase(pvd *UserProvider) api.UserUsecase {
 func (u *userUsecase) Register(ctx context.Context, user *entity.User) (*entity.UserPublic, error) {
 	user.Normalize()
 	if err := user.Validate(); err != nil {
-		return nil, errors.Wrap(err, "Validate user failed")
+		return nil, api.SejastipError{
+			Message:    err.Error(),
+			ErrorCode:  400,
+			HTTPStatus: http.StatusBadRequest,
+		}
 	}
 
 	// Check if there is an existing user with the specified email

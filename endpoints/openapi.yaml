@@ -1,0 +1,1328 @@
+openapi: 3.0.0
+info:
+  title: Sejastip API
+  description: This is the complete definitions and documentations for Sejastip API
+  contact:
+    email: fahmadnaufal@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+- url: https://api.sejastip.id
+  description: Sejastip production API
+tags:
+- name: users
+  description: Operations related to User resource
+- name: banks
+  description: Operations available to Bank resource
+- name: authentication
+  description: Operations for authentication
+- name: countries
+  description: Operations available to Countries resource
+- name: address
+  description: Operations available to User Addresses resource
+- name: transactions
+  description: Operations available to transactions resource
+paths:
+  /users:
+    get:
+      tags:
+      - users
+      summary: fetch all registered users in the system
+      description: |
+        Get all users registered in the Sejastip database
+      operationId: getUsers
+      parameters:
+      - name: offset
+        in: query
+        description: number of records to offset for pagination
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: maximum number of records to return
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 100
+          minimum: 0
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: users found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        400:
+          description: bad input parameter
+    post:
+      tags:
+      - users
+      summary: register a new user
+      description: Register a new user to the system
+      operationId: createUser
+      parameters:
+      - name: User-Agent
+        in: header
+        description: the client user agent
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: Redmi 3 Android Pie
+      requestBody:
+        description: User data to be submitted to registration
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsersForm'
+      responses:
+        201:
+          description: user successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_201'
+        400:
+          description: invalid input given
+        409:
+          description: email or username already taken
+  /users/{id}:
+    get:
+      tags:
+      - users
+      summary: fetch a user data in the system
+      description: |
+        Get a user registered in the Sejastip database
+      operationId: getUser
+      parameters:
+      - name: id
+        in: path
+        description: ID of the requested user
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: number
+          format: int32
+          example: 1
+      responses:
+        200:
+          description: users found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+        400:
+          description: user not found
+  /me:
+    get:
+      tags:
+      - users
+      summary: get my data
+      description: |
+        Get the logged in user data
+      operationId: getMe
+      responses:
+        200:
+          description: data found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+      security:
+      - bearerAuth: []
+  /banks:
+    get:
+      tags:
+      - banks
+      summary: get list of registered banks
+      description: |
+        Get the list of banks registered in the system
+      operationId: getBanks
+      parameters:
+      - name: offset
+        in: query
+        description: number of records to offset for pagination
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: maximum number of records to return
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 100
+          minimum: 0
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: list of banks existed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_2'
+  /auth:
+    post:
+      tags:
+      - authentication
+      summary: authenticate user and create their session token
+      description: |
+        Authenticate user by email and password and return a JWT token for them
+      operationId: authenticate
+      parameters:
+      - name: User-Agent
+        in: header
+        description: the client user agent
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: Redmi 3 Android Pie
+      requestBody:
+        description: Authentication data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthForm'
+      responses:
+        200:
+          description: user successfully logged in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_3'
+        400:
+          description: invalid input given
+        409:
+          description: email or username already taken
+  /countries:
+    get:
+      tags:
+      - countries
+      summary: get list of registered countries, sorted alphabetically
+      description: |
+        Get the list of countries registered in the system, sorted alphabetically
+      operationId: getCountries
+      parameters:
+      - name: offset
+        in: query
+        description: number of records to offset for pagination
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: maximum number of records to return
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 100
+          minimum: 0
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: list of countries existed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_4'
+  /countries/{id}:
+    get:
+      tags:
+      - countries
+      summary: get a single country data
+      description: |
+        Get a country details, defined by its ID
+      operationId: getCountry
+      parameters:
+      - name: id
+        in: path
+        description: ID of the requested user
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: number
+          format: int32
+          example: 1
+      responses:
+        200:
+          description: country found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_5'
+        400:
+          description: country not found
+  /products:
+    get:
+      tags:
+      - products
+      summary: get product results by the query
+      description: |
+        Fetch a number of registered products, can be filtered by specific keyword, seller, or country
+      operationId: getProducts
+      parameters:
+      - name: offset
+        in: query
+        description: number of records to offset for pagination
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: maximum number of records to return
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 100
+          minimum: 0
+          type: integer
+          format: int32
+      - name: q
+        in: query
+        description: the keyword query string
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: barang
+      - name: seller_id
+        in: query
+        description: the user ID selling the product
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+          example: 1
+      - name: country_id
+        in: query
+        description: the specific country ID of the product
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+          example: 1
+      responses:
+        200:
+          description: products found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_6'
+    post:
+      tags:
+      - products
+      summary: create a new product
+      description: |
+        Create a new product for the logged in user
+      operationId: createProduct
+      parameters:
+      - name: Authorization
+        in: header
+        description: the logged in user token
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: Token xxx.yyy.zzz
+      requestBody:
+        description: Product data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductForm'
+      responses:
+        201:
+          description: products successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_201_1'
+        400:
+          description: missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+  /products/{id}:
+    get:
+      tags:
+      - products
+      summary: get product results by the query
+      description: |
+        Fetch a number of registered products, can be filtered by specific keyword, seller, or country
+      operationId: getProduct
+      parameters:
+      - name: id
+        in: path
+        description: the product ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: number
+          format: int32
+          example: 1
+      responses:
+        200:
+          description: product found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_7'
+        404:
+          description: product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+    put:
+      tags:
+      - products
+      summary: update a product data
+      description: |
+        Update a product data, specified with the product ID, with the submitted values
+      operationId: updateProduct
+      parameters:
+      - name: id
+        in: path
+        description: the product ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: number
+          format: int32
+          example: 1
+      requestBody:
+        description: Updated product data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpdateForm'
+      responses:
+        200:
+          description: product successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_7'
+        404:
+          description: product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+  /users/{id}/addresses:
+    get:
+      tags:
+      - address
+      summary: get user addresses
+      description: |
+        Fetch the registered addresses of a specific user
+      operationId: getUserAddresses
+      parameters:
+      - name: id
+        in: path
+        description: the user ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: number
+          format: int32
+          example: 1
+      responses:
+        200:
+          description: addresses found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_8'
+    post:
+      tags:
+      - address
+      summary: create a new user address
+      description: |
+        Create a new address under a specific user defined by its ID
+      operationId: createUserAddress
+      parameters:
+      - name: id
+        in: path
+        description: the user ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: number
+          format: int32
+          example: 1
+      - name: Authorization
+        in: header
+        description: the logged in user token
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: Token xxx.yyy.zzz
+      requestBody:
+        description: User address data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserAddressForm'
+      responses:
+        201:
+          description: user address successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_201_2'
+        400:
+          description: missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+  /addresses/{id}:
+    get:
+      tags:
+      - address
+      summary: get user address
+      description: |
+        Fetch a single registered user address by its ID
+      operationId: getUserAddress
+      parameters:
+      - name: id
+        in: path
+        description: the user address ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: number
+          format: int32
+          example: 1
+      responses:
+        200:
+          description: address found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_9'
+    put:
+      tags:
+      - address
+      summary: update a user address
+      description: |
+        Update a user address data with new submitted values
+      operationId: updateUserAddress
+      parameters:
+      - name: id
+        in: path
+        description: the address ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: number
+          format: int32
+          example: 1
+      - name: Authorization
+        in: header
+        description: the logged in user token
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: Token xxx.yyy.zzz
+      requestBody:
+        description: User address data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserAddressForm'
+      responses:
+        201:
+          description: user address successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_9'
+  /transactions:
+    get:
+      tags:
+      - transactions
+      summary: get user transactions
+      description: |
+        Fetch a single registered user address by its ID
+      operationId: getTransactions
+      parameters:
+      - name: offset
+        in: query
+        description: number of records to offset for pagination
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: maximum number of records to return
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 100
+          minimum: 0
+          type: integer
+          format: int32
+      - name: role
+        in: query
+        description: get list of transactions based on requesting user role (buyer/seller).
+          If empty, return both transactions
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: buyer
+      - name: product_id
+        in: query
+        description: the product ID in transactions
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: number
+          example: 1
+      responses:
+        200:
+          description: transactions found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_10'
+    post:
+      tags:
+      - transactions
+      summary: create a new transaction
+      description: |
+        Create a new transaction on a product defined by its ID
+      operationId: createTransaction
+      parameters:
+      - name: Authorization
+        in: header
+        description: the logged in user token
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: Token xxx.yyy.zzz
+      requestBody:
+        description: Product data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionForm'
+      responses:
+        201:
+          description: transaction successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_201_3'
+  /transactions/{id}:
+    get:
+      tags:
+      - transactions
+      summary: get a transaction detail
+      description: |
+        Fetch a single registered user address by its ID
+      operationId: getTransaction
+      parameters:
+      - name: id
+        in: path
+        description: the transaction ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minimum: 1
+          type: number
+      responses:
+        200:
+          description: transaction found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_11'
+components:
+  schemas:
+    MetaDefault:
+      type: object
+      properties:
+        status:
+          type: number
+          example: 200
+    MetaCreated:
+      type: object
+      properties:
+        status:
+          type: number
+          example: 201
+    MetaPagination:
+      type: object
+      properties:
+        offset:
+          type: number
+          example: 0
+        limit:
+          type: number
+          example: 10
+        total:
+          type: number
+          example: 1
+      allOf:
+      - $ref: '#/components/schemas/MetaDefault'
+    MetaSearch:
+      type: object
+      properties:
+        q:
+          type: string
+          example: barang
+      allOf:
+      - $ref: '#/components/schemas/MetaPagination'
+    UsersPublic:
+      required:
+      - bank_account
+      - bank_name
+      - email
+      - id
+      - image
+      - name
+      - phone
+      - registered_at
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        name:
+          type: string
+          example: Rocky Balboa
+        email:
+          type: string
+          example: rockybalboa@gmail.com
+        registered_at:
+          type: string
+          format: date-time
+          example: 2019-09-30T18:00:00Z
+        image:
+          type: string
+          example: https://sejastip.id/static/123.jpg
+        phone:
+          type: string
+          example: "6289612341234"
+        bank_name:
+          type: string
+          example: BCA
+        bank_account:
+          type: string
+          example: "712341234"
+    UsersForm:
+      required:
+      - bank_account
+      - bank_name
+      - email
+      - name
+      - password
+      - phone
+      type: object
+      properties:
+        name:
+          type: string
+          example: Rocky Balboa
+        email:
+          type: string
+          example: rockybalboa@gmail.com
+        phone:
+          type: string
+          example: "6289612341234"
+        bank_name:
+          type: string
+          example: BCA
+        bank_account:
+          type: string
+          example: "712341234"
+        password:
+          type: string
+          example: rockybalboapetinju
+    BankPublic:
+      required:
+      - id
+      - image
+      - name
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        name:
+          type: string
+          example: BCA
+        image:
+          type: string
+          example: https://sejastip.id/static/banks/1.jpg
+    AuthResponse:
+      required:
+      - created_at
+      - token
+      type: object
+      properties:
+        token:
+          type: string
+          example: xxxxx.yyyyy.zzzzz
+        created_at:
+          type: string
+          format: date-time
+          example: 2019-09-30T18:00:00Z
+        expired_at:
+          type: string
+          format: date-time
+    AuthForm:
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+          example: rockybalboa@gmail.com
+        password:
+          type: string
+          example: rockybalboapetinju
+    CountryPublic:
+      required:
+      - id
+      - image
+      - name
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        name:
+          type: string
+          example: Indonesia
+        image:
+          type: string
+          example: https://sejastip.id/static/indonesia.jpg
+    ProductPublic:
+      required:
+      - country
+      - created_at
+      - description
+      - from_date
+      - id
+      - image
+      - price
+      - seller
+      - status
+      - title
+      - to_date
+      - updated_at
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        title:
+          type: string
+          example: Samyang Keju
+        description:
+          type: string
+          example: Samyang asli dari Korea Selatan, halal
+        price:
+          type: number
+          example: 12000
+        image:
+          type: string
+          example: https://sejastip.id/static/products/1.jpg
+        from_date:
+          type: string
+          format: date
+          example: 2019-10-01
+        to_date:
+          type: string
+          format: date
+          example: 2019-11-01
+        seller:
+          $ref: '#/components/schemas/UsersPublic'
+        country:
+          $ref: '#/components/schemas/CountryPublic'
+        status:
+          type: string
+          example: offered
+        created_at:
+          type: string
+          format: date-time
+          example: 2019-09-30T18:00:00Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2019-09-30T20:00:00Z
+    ProductForm:
+      required:
+      - country_id
+      - description
+      - from_date
+      - image_file
+      - price
+      - title
+      - to_date
+      type: object
+      properties:
+        title:
+          type: string
+          example: Samyang Keju
+        description:
+          type: string
+          example: Samyang asli dari Korea Selatan, halal
+        price:
+          type: number
+          example: 12000
+        country_id:
+          type: number
+          description: the ID of the selected country (see countries resources)
+          example: 1
+        image_file:
+          type: string
+          description: the product image to be uploaded, stored in base64 encoded
+            format
+          example: data:image/jpeg;base64,/9j/4AAQSkZJRgABAgEAYABgAAD=
+        from_date:
+          type: string
+          format: date
+          example: 2019-10-01
+        to_date:
+          type: string
+          format: date
+          example: 2019-11-01
+    ProductUpdateForm:
+      required:
+      - country_id
+      - description
+      - from_date
+      - price
+      - title
+      - to_date
+      type: object
+      properties:
+        title:
+          type: string
+          example: Samyang Keju
+        description:
+          type: string
+          example: Samyang asli dari Korea Selatan, halal
+        price:
+          type: number
+          example: 12000
+        country_id:
+          type: number
+          description: the ID of the selected country (see countries resources)
+          example: 1
+        from_date:
+          type: string
+          format: date
+          example: 2019-10-01
+        to_date:
+          type: string
+          format: date
+          example: 2019-11-01
+    UserAddressPublic:
+      required:
+      - address
+      - address_name
+      - created_at
+      - id
+      - phone
+      - updated_at
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        address:
+          type: string
+          example: Jalan Merkuri Utara
+        phone:
+          type: string
+          example: "08969123123"
+        address_name:
+          type: string
+          example: Rocky
+        created_at:
+          type: string
+          format: date-time
+          example: 2019-09-30T18:00:00Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2019-09-30T20:00:00Z
+    UserAddressForm:
+      required:
+      - address
+      - address_name
+      - phone
+      type: object
+      properties:
+        address:
+          type: string
+          example: Jalan Merkuri Utara
+        phone:
+          type: string
+          example: "08969123123"
+        address_name:
+          type: string
+          example: Rocky
+    TransactionPublic:
+      required:
+      - buyer
+      - buyer_address
+      - created_at
+      - finished_at
+      - id
+      - paid_at
+      - product
+      - quantity
+      - status
+      - total_price
+      - updated_at
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        product:
+          $ref: '#/components/schemas/ProductPublic'
+        buyer:
+          $ref: '#/components/schemas/UsersPublic'
+        buyer_address:
+          $ref: '#/components/schemas/UserAddressPublic'
+        quantity:
+          type: number
+          example: 2
+        total_price:
+          type: number
+          example: 24000
+        notes:
+          type: string
+          example: Jangan pedas
+        status:
+          type: string
+          example: paid
+        paid_at:
+          type: string
+          format: date-time
+          example: 2019-09-30T21:00:00Z
+        finished_at:
+          type: string
+          format: date-time
+          example: 2019-10-01T20:00:00Z
+        created_at:
+          type: string
+          format: date-time
+          example: 2019-09-30T18:00:00Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2019-10-01T20:00:00Z
+    TransactionForm:
+      required:
+      - address_id
+      - product_id
+      - quantity
+      type: object
+      properties:
+        product_id:
+          type: number
+          example: 1
+        quantity:
+          type: number
+          example: 3
+        address_id:
+          type: number
+          example: 2
+        notes:
+          type: string
+          example: Samyang yang pedes semuanya
+    inline_response_200:
+      required:
+      - meta
+      - result
+      type: object
+      properties:
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/UsersPublic'
+        meta:
+          $ref: '#/components/schemas/MetaPagination'
+    inline_response_201:
+      required:
+      - meta
+      - result
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/UsersPublic'
+        meta:
+          $ref: '#/components/schemas/MetaCreated'
+    inline_response_200_1:
+      required:
+      - meta
+      - result
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/UsersPublic'
+        meta:
+          $ref: '#/components/schemas/MetaDefault'
+    inline_response_200_2:
+      required:
+      - meta
+      - result
+      type: object
+      properties:
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/BankPublic'
+        meta:
+          $ref: '#/components/schemas/MetaPagination'
+    inline_response_200_3:
+      required:
+      - meta
+      - result
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/AuthResponse'
+        meta:
+          $ref: '#/components/schemas/MetaDefault'
+    inline_response_200_4:
+      required:
+      - meta
+      - result
+      type: object
+      properties:
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/CountryPublic'
+        meta:
+          $ref: '#/components/schemas/MetaPagination'
+    inline_response_200_5:
+      required:
+      - meta
+      - result
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/CountryPublic'
+        meta:
+          $ref: '#/components/schemas/MetaDefault'
+    inline_response_200_6:
+      required:
+      - meta
+      - result
+      type: object
+      properties:
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductPublic'
+        meta:
+          $ref: '#/components/schemas/MetaSearch'
+    inline_response_201_1:
+      required:
+      - meta
+      - result
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/ProductPublic'
+        meta:
+          $ref: '#/components/schemas/MetaCreated'
+    inline_response_400_error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Invalid parameter
+        code:
+          type: number
+          example: 400
+    inline_response_400_meta:
+      type: object
+      properties:
+        status:
+          type: number
+          example: 400
+    inline_response_400:
+      required:
+      - error
+      - meta
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/inline_response_400_error'
+        meta:
+          $ref: '#/components/schemas/inline_response_400_meta'
+    inline_response_200_7:
+      required:
+      - meta
+      - result
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/ProductPublic'
+        meta:
+          $ref: '#/components/schemas/MetaDefault'
+    inline_response_404_error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Produk tidak ditemukan
+        code:
+          type: number
+          example: 404
+    inline_response_404_meta:
+      type: object
+      properties:
+        status:
+          type: number
+          example: 404
+    inline_response_404:
+      required:
+      - error
+      - meta
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/inline_response_404_error'
+        meta:
+          $ref: '#/components/schemas/inline_response_404_meta'
+    inline_response_200_8:
+      required:
+      - meta
+      - result
+      type: object
+      properties:
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserAddressPublic'
+        meta:
+          $ref: '#/components/schemas/MetaDefault'
+    inline_response_201_2:
+      required:
+      - meta
+      - result
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/UserAddressPublic'
+        meta:
+          $ref: '#/components/schemas/MetaCreated'
+    inline_response_200_9:
+      required:
+      - meta
+      - result
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/UserAddressPublic'
+        meta:
+          $ref: '#/components/schemas/MetaDefault'
+    inline_response_200_10:
+      required:
+      - meta
+      - result
+      type: object
+      properties:
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionPublic'
+        meta:
+          $ref: '#/components/schemas/MetaDefault'
+    inline_response_201_3:
+      required:
+      - meta
+      - result
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/TransactionPublic'
+        meta:
+          $ref: '#/components/schemas/MetaCreated'
+    inline_response_200_11:
+      required:
+      - meta
+      - result
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/TransactionPublic'
+        meta:
+          $ref: '#/components/schemas/MetaDefault'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
