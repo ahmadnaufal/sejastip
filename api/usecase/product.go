@@ -87,8 +87,20 @@ func (uc *productUsecase) UpdateProduct(ctx context.Context, ID int64, newProduc
 	return uc.GetProduct(ctx, ID)
 }
 
-func (uc *productUsecase) DeleteProduct(ctx context.Context, ID int64) error {
-	err := uc.Provider.ProductRepo.DeleteProduct(ctx, ID)
+func (uc *productUsecase) DeleteProduct(ctx context.Context, productID, userID int64) error {
+	// check first if the product is owned by the user
+	product, err := uc.Provider.ProductRepo.GetProduct(ctx, productID)
+	if err != nil {
+		return errors.Wrap(err, "error fetching product")
+	}
+
+	if product.SellerID != userID {
+		return api.ErrEditProductForbidden
+	}
+
+	// the user requesting product deletion is the owner of the product:
+	// proceed with the delete
+	err = uc.Provider.ProductRepo.DeleteProduct(ctx, productID)
 	if err != nil {
 		return errors.Wrap(err, "error in deleting product")
 	}

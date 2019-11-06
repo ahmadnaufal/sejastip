@@ -172,7 +172,7 @@ func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request, p
 }
 
 func (h *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request, p httprouter.Params) error {
-	id, err := strconv.ParseInt(p.ByName("id"), 10, 64)
+	productID, err := strconv.ParseInt(p.ByName("id"), 10, 64)
 	if err != nil {
 		err = api.ErrInvalidParameter
 		api.Error(w, err)
@@ -181,7 +181,8 @@ func (h *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request, p
 
 	// delete product by id
 	ctx := r.Context()
-	err = h.uc.DeleteProduct(ctx, id)
+	meta := api.MetaFromContext(ctx)
+	err = h.uc.DeleteProduct(ctx, productID, meta.ID)
 	if err != nil {
 		api.Error(w, err)
 		return err

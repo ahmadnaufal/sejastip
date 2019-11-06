@@ -88,7 +88,7 @@ type ProductUsecase interface {
 	GetProductsByFilter(ctx context.Context, filter entity.DynamicFilter, limit, offset int) ([]entity.ProductPublic, int64, error)
 	GetProduct(ctx context.Context, ID int64) (*entity.ProductPublic, error)
 	UpdateProduct(ctx context.Context, ID int64, newProduct *entity.Product) (*entity.ProductPublic, error)
-	DeleteProduct(ctx context.Context, ID int64) error
+	DeleteProduct(ctx context.Context, productID, userID int64) error
 	UploadProductImage(ctx context.Context, filename string, content []byte) (string, error)
 }
 

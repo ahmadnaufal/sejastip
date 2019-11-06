@@ -39,6 +39,13 @@ var (
 		ErrorCode:  403,
 		HTTPStatus: http.StatusForbidden,
 	}
+
+	// ErrEditProductForbidden represents
+	ErrEditProductForbidden = SejastipError{
+		Message:    "Kamu tidak bisa mengubah atau menghapus produk yang bukan milik kamu",
+		ErrorCode:  403,
+		HTTPStatus: http.StatusForbidden,
+	}
 )
 
 // SejastipError defines our custom error
