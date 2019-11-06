@@ -60,3 +60,11 @@ type SejastipError struct {
 func (e SejastipError) Error() string {
 	return e.Message
 }
+
+func ValidationError(err error) SejastipError {
+	return SejastipError{
+		Message:    err.Error(),
+		ErrorCode:  400,
+		HTTPStatus: http.StatusBadRequest,
+	}
+}

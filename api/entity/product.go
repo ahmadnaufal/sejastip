@@ -1,6 +1,11 @@
 package entity
 
-import "time"
+import (
+	"strings"
+	"time"
+
+	"github.com/pkg/errors"
+)
 
 const (
 	ProductStatusIdle = iota
@@ -29,6 +34,40 @@ type Product struct {
 	CreatedAt   time.Time  `db:"created_at"`
 	UpdatedAt   time.Time  `db:"updated_at"`
 	DeletedAt   *time.Time `db:"deleted_at"`
+}
+
+func (p *Product) NormalizeCreate() {
+	p.Title = strings.TrimSpace(p.Title)
+	p.Description = strings.TrimSpace(p.Description)
+	p.Image = strings.TrimSpace(p.Image)
+}
+
+func (p *Product) ValidateCreate() error {
+	if len(p.Title) < 3 {
+		return errors.New("Judul produk harus lebih dari 3 karakter")
+	}
+
+	if p.Price < 1 {
+		return errors.New("Harga produk tidak boleh kosong atau negatif")
+	}
+
+	if p.SellerID < 1 {
+		return errors.New("Penjual harus terdaftar")
+	}
+
+	if p.ToDate.Before(time.Now()) {
+		return errors.New("Waktu akhir penawaran barang tidak boleh di waktu yang lalu")
+	}
+
+	if p.Image == "" {
+		return errors.New("Harus upload foto produk terlebih dahulu")
+	}
+
+	if p.CountryID < 1 {
+		return errors.New("Harus memilih negara lokasi penjualan barang")
+	}
+
+	return nil
 }
 
 type ProductForm struct {

@@ -28,6 +28,9 @@ func NewProductUsecase(pvd *ProductProvider) api.ProductUsecase {
 }
 
 func (uc *productUsecase) CreateProduct(ctx context.Context, product *entity.Product) (*entity.ProductPublic, error) {
+	if err := product.ValidateCreate(); err != nil {
+		return nil, api.ValidationError(err)
+	}
 	_, err := uc.Provider.CountryRepo.GetCountry(ctx, product.CountryID)
 	if err != nil {
 		return nil, err

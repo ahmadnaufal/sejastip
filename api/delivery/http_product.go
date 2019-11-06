@@ -60,8 +60,6 @@ func (h *ProductHandler) GetProducts(w http.ResponseWriter, r *http.Request, _ h
 
 func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request, _ httprouter.Params) error {
 	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-
 	var productForm entity.ProductForm
 	if err := decoder.Decode(&productForm); err != nil {
 		api.Error(w, api.ErrInvalidParameter)
@@ -81,27 +79,30 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request, _
 		return err
 	}
 
-	file, extension, err := util.DecodeUploadedBase64File(productForm.ImageFile)
-	if err != nil {
-		err = api.SejastipError{
-			Message:    fmt.Sprintf("Error parsing file: %v", err),
-			ErrorCode:  400,
-			HTTPStatus: http.StatusBadRequest,
-		}
-		api.Error(w, err)
-		return err
-	}
-
-	// Create product
 	ctx := r.Context()
-	// upload file
-	filename := fmt.Sprintf("%s%s", uuid.New().String(), extension)
-	filePath, err := h.uc.UploadProductImage(ctx, filename, file)
-	if err != nil {
-		api.Error(w, err)
-		return errors.Wrap(err, "error in uploading file")
+	filePath := ""
+	if productForm.ImageFile != "" {
+		file, extension, err := util.DecodeUploadedBase64File(productForm.ImageFile)
+		if err != nil {
+			err = api.SejastipError{
+				Message:    fmt.Sprintf("Error parsing file: %v", err),
+				ErrorCode:  400,
+				HTTPStatus: http.StatusBadRequest,
+			}
+			api.Error(w, err)
+			return err
+		}
+
+		// upload file
+		filename := fmt.Sprintf("%s%s", uuid.New().String(), extension)
+		filePath, err = h.uc.UploadProductImage(ctx, filename, file)
+		if err != nil {
+			api.Error(w, err)
+			return errors.Wrap(err, "error in uploading file")
+		}
 	}
 
+	// Create product, but normalize the inputs first
 	meta := api.MetaFromContext(ctx)
 	product := entity.Product{
 		Title:       productForm.Title,
@@ -113,6 +114,8 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request, _
 		ToDate:      toDateInTime,
 		Image:       filePath,
 	}
+	product.NormalizeCreate()
+
 	productPublic, err := h.uc.CreateProduct(ctx, &product)
 	if err != nil {
 		api.Error(w, err)
