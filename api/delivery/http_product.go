@@ -144,7 +144,7 @@ func (h *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request, p ht
 }
 
 func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request, p httprouter.Params) error {
-	id, err := strconv.ParseInt(p.ByName("id"), 10, 64)
+	productID, err := strconv.ParseInt(p.ByName("id"), 10, 64)
 	if err != nil {
 		api.Error(w, api.ErrInvalidParameter)
 		return err
@@ -161,7 +161,8 @@ func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request, p
 
 	// update product
 	ctx := r.Context()
-	productPublic, err := h.uc.UpdateProduct(ctx, id, &product)
+	meta := api.MetaFromContext(ctx)
+	productPublic, err := h.uc.UpdateProduct(ctx, productID, meta.ID, &product)
 	if err != nil {
 		api.Error(w, err)
 		return err

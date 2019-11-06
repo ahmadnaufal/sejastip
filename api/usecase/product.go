@@ -78,13 +78,23 @@ func (uc *productUsecase) GetProduct(ctx context.Context, ID int64) (*entity.Pro
 	return &publicProduct, nil
 }
 
-func (uc *productUsecase) UpdateProduct(ctx context.Context, ID int64, newProduct *entity.Product) (*entity.ProductPublic, error) {
-	err := uc.Provider.ProductRepo.UpdateProduct(ctx, ID, newProduct)
+func (uc *productUsecase) UpdateProduct(ctx context.Context, productID, userID int64, newProduct *entity.Product) (*entity.ProductPublic, error) {
+	// check first if the product is owned by the user
+	product, err := uc.Provider.ProductRepo.GetProduct(ctx, productID)
+	if err != nil {
+		return nil, errors.Wrap(err, "error fetching product")
+	}
+
+	if product.SellerID != userID {
+		return nil, api.ErrEditProductForbidden
+	}
+
+	err = uc.Provider.ProductRepo.UpdateProduct(ctx, productID, newProduct)
 	if err != nil {
 		return nil, errors.Wrap(err, "error in updating product")
 	}
 
-	return uc.GetProduct(ctx, ID)
+	return uc.GetProduct(ctx, productID)
 }
 
 func (uc *productUsecase) DeleteProduct(ctx context.Context, productID, userID int64) error {
