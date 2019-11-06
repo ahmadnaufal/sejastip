@@ -43,7 +43,7 @@ func (u *authUsecase) AuthenticateUser(ctx context.Context, auth *entity.AuthCre
 
 	// After all credentials are valid, we create a claim to store all user data
 	createdAt := time.Now()
-	expirationTime := time.Now().Add(3 * time.Hour)
+	expirationTime := time.Now().Add(96 * time.Hour)
 	claims := entity.ResourceClaims{
 		ID:           user.ID,
 		Email:        user.Email,

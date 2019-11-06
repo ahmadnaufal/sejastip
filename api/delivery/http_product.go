@@ -60,8 +60,6 @@ func (h *ProductHandler) GetProducts(w http.ResponseWriter, r *http.Request, _ h
 
 func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request, _ httprouter.Params) error {
 	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-
 	var productForm entity.ProductForm
 	if err := decoder.Decode(&productForm); err != nil {
 		api.Error(w, api.ErrInvalidParameter)
@@ -81,27 +79,30 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request, _
 		return err
 	}
 
-	file, extension, err := util.DecodeUploadedBase64File(productForm.ImageFile)
-	if err != nil {
-		err = api.SejastipError{
-			Message:    fmt.Sprintf("Error parsing file: %v", err),
-			ErrorCode:  400,
-			HTTPStatus: http.StatusBadRequest,
-		}
-		api.Error(w, err)
-		return err
-	}
-
-	// Create product
 	ctx := r.Context()
-	// upload file
-	filename := fmt.Sprintf("%s%s", uuid.New().String(), extension)
-	filePath, err := h.uc.UploadProductImage(ctx, filename, file)
-	if err != nil {
-		api.Error(w, err)
-		return errors.Wrap(err, "error in uploading file")
+	filePath := ""
+	if productForm.ImageFile != "" {
+		file, extension, err := util.DecodeUploadedBase64File(productForm.ImageFile)
+		if err != nil {
+			err = api.SejastipError{
+				Message:    fmt.Sprintf("Error parsing file: %v", err),
+				ErrorCode:  400,
+				HTTPStatus: http.StatusBadRequest,
+			}
+			api.Error(w, err)
+			return err
+		}
+
+		// upload file
+		filename := fmt.Sprintf("%s%s", uuid.New().String(), extension)
+		filePath, err = h.uc.UploadProductImage(ctx, filename, file)
+		if err != nil {
+			api.Error(w, err)
+			return errors.Wrap(err, "error in uploading file")
+		}
 	}
 
+	// Create product, but normalize the inputs first
 	meta := api.MetaFromContext(ctx)
 	product := entity.Product{
 		Title:       productForm.Title,
@@ -113,6 +114,8 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request, _
 		ToDate:      toDateInTime,
 		Image:       filePath,
 	}
+	product.NormalizeCreate()
+
 	productPublic, err := h.uc.CreateProduct(ctx, &product)
 	if err != nil {
 		api.Error(w, err)
@@ -144,7 +147,7 @@ func (h *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request, p ht
 }
 
 func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request, p httprouter.Params) error {
-	id, err := strconv.ParseInt(p.ByName("id"), 10, 64)
+	productID, err := strconv.ParseInt(p.ByName("id"), 10, 64)
 	if err != nil {
 		api.Error(w, api.ErrInvalidParameter)
 		return err
@@ -161,7 +164,8 @@ func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request, p
 
 	// update product
 	ctx := r.Context()
-	productPublic, err := h.uc.UpdateProduct(ctx, id, &product)
+	meta := api.MetaFromContext(ctx)
+	productPublic, err := h.uc.UpdateProduct(ctx, productID, meta.ID, &product)
 	if err != nil {
 		api.Error(w, err)
 		return err
@@ -172,7 +176,7 @@ func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request, p
 }
 
 func (h *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request, p httprouter.Params) error {
-	id, err := strconv.ParseInt(p.ByName("id"), 10, 64)
+	productID, err := strconv.ParseInt(p.ByName("id"), 10, 64)
 	if err != nil {
 		err = api.ErrInvalidParameter
 		api.Error(w, err)
@@ -181,7 +185,8 @@ func (h *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request, p
 
 	// delete product by id
 	ctx := r.Context()
-	err = h.uc.DeleteProduct(ctx, id)
+	meta := api.MetaFromContext(ctx)
+	err = h.uc.DeleteProduct(ctx, productID, meta.ID)
 	if err != nil {
 		api.Error(w, err)
 		return err
