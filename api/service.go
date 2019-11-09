@@ -55,6 +55,14 @@ type TransactionRepository interface {
 	CreateTransaction(ctx context.Context, transaction *entity.Transaction) error
 }
 
+// DeviceRepository is a contract for structs implementing device storage
+type DeviceRepository interface {
+	GetUserDevice(ctx context.Context, userID int64) (*entity.Device, error)
+	InsertUserDevice(ctx context.Context, device *entity.Device) error
+	UpdateUserDevice(ctx context.Context, ID int64, newDevice *entity.Device) error
+	RemoveDevice(ctx context.Context, ID int64) error
+}
+
 // UserUsecase is a contract for usecases related to users
 type UserUsecase interface {
 	Register(ctx context.Context, user *entity.User) (*entity.UserPublic, error)
@@ -105,4 +113,8 @@ type TransactionUsecase interface {
 	GetTransactions(ctx context.Context, filter entity.DynamicFilter, limit, offset int) ([]*entity.TransactionPublic, int64, error)
 	GetTransaction(ctx context.Context, transactionID int64) (*entity.TransactionPublic, error)
 	CreateTransaction(ctx context.Context, transactionForm *entity.TransactionForm, userID int64) (*entity.TransactionPublic, error)
+}
+
+type DeviceUsecase interface {
+	UpsertDevice(ctx context.Context, device *entity.Device) error
 }

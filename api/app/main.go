@@ -111,6 +111,8 @@ func main() {
 	productRepo := repository.NewMysqlProduct(db)
 	addressRepo := repository.NewMysqlUserAddress(db)
 	transactionRepo := repository.NewMysqlTransaction(db)
+	deviceRepo := repository.NewMysqlDevice(db)
+
 	appStorage := storage.NewLocalStorage()
 	if config.GCS.Enabled {
 		appStorage = storage.NewGCS(config.GCS.BucketID)
@@ -159,7 +161,12 @@ func main() {
 	})
 	th := delivery.NewTransactionHandler(tc)
 
-	h := handler.NewHandler(config.JWTPrivateKey, &uh, &ah, &bh, &ch, &ph, &uah, &th)
+	dc := usecase.NewDeviceUsecase(&usecase.DeviceProvider{
+		DeviceRepo: deviceRepo,
+	})
+	dh := delivery.NewDeviceHandler(dc)
+
+	h := handler.NewHandler(config.JWTPrivateKey, &uh, &ah, &bh, &ch, &ph, &uah, &th, &dh)
 
 	s := &http.Server{
 		Addr:         fmt.Sprintf(":%s", config.Port),
