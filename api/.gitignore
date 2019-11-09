@@ -14,7 +14,7 @@
 # Jetbrains GoLand
 .idea/
 
-.env
+.env*
 
 # Development binary generated with `make compile`
 sejastip-api
