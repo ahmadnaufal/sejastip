@@ -6,5 +6,5 @@ type NotificationRequest struct {
 	Data   struct {
 		Title   string `json:"title"`
 		Content string `json:"content"`
-	}
+	} `json:"data"`
 }
