@@ -8,6 +8,7 @@ import (
 
 	"sejastip.id/api"
 	"sejastip.id/api/entity"
+	"sejastip.id/api/infra"
 )
 
 type TransactionProvider struct {
@@ -16,6 +17,8 @@ type TransactionProvider struct {
 	ProductRepo     api.ProductRepository
 	AddressRepo     api.UserAddressRepository
 	CountryRepo     api.CountryRepository
+	DeviceRepo      api.DeviceRepository
+	Pubsub          *infra.PubsubClient
 }
 
 type TransactionUsecase struct {
@@ -170,6 +173,18 @@ func (uc *TransactionUsecase) CreateTransaction(ctx context.Context, transaction
 	err = uc.TransactionRepo.CreateTransaction(ctx, &transaction)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating transaction")
+	}
+
+	// notify
+	device, _ := uc.DeviceRepo.GetUserDevice(ctx, transaction.SellerID)
+	if device != nil {
+		notification := &entity.NotificationRequest{
+			Device: device.DeviceID,
+			UserID: transaction.SellerID,
+		}
+		notification.Data.Title = "Ada transaksi baru untuk kamu!"
+		notification.Data.Content = "Ada transaksi baru untuk kamu!"
+		uc.Pubsub.PublishNotification(ctx, notification)
 	}
 
 	return uc.GetTransaction(ctx, transaction.ID)

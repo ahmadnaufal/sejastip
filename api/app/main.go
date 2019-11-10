@@ -10,6 +10,8 @@ import (
 	"syscall"
 	"time"
 
+	"sejastip.id/api/infra"
+
 	"sejastip.id/api/storage"
 
 	"sejastip.id/api/delivery"
@@ -36,6 +38,8 @@ type Config struct {
 		CloudSQLEnabled        bool   `env:"DATABASE_CLOUD_SQL_ENABLED,default=false"`
 		CloudSQLConnectionName string `env:"DATABASE_CLOUD_SQL_CONNECTION_NAME"`
 	}
+
+	PubsubProject string `env:"PUBSUB_PROJECT,required"`
 
 	GCS struct {
 		Enabled  bool   `env:"GCS_ENABLED,default=false"`
@@ -101,6 +105,11 @@ func main() {
 		db, err = NewMysqlConnection(&config)
 	}
 
+	pubsub, err := infra.NewPubsubClient(config.PubsubProject)
+	if err != nil {
+		log.Fatal("error connecting to pubsub: ", err)
+	}
+
 	if err != nil {
 		log.Fatal("error connecting to mysql server: ", err)
 	}
@@ -158,6 +167,8 @@ func main() {
 		ProductRepo:     productRepo,
 		AddressRepo:     addressRepo,
 		CountryRepo:     countryRepo,
+		DeviceRepo:      deviceRepo,
+		Pubsub:          pubsub,
 	})
 	th := delivery.NewTransactionHandler(tc)
 
