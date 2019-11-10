@@ -6,7 +6,7 @@ from pyfcm import FCMNotification
 from google.cloud import datastore
 from datetime import datetime
 
-ds_client = datastore.Client(namespace='Sejastip')
+ds_client = datastore.Client("stunning-strand-255714")
 
 def send_push_notification_pubsub(event, context):
     """Triggered from a message on a Cloud Pub/Sub topic.
