@@ -3,6 +3,10 @@ import json
 import os
 
 from pyfcm import FCMNotification
+from google.cloud import datastore
+from datetime import datetime
+
+ds_client = datastore.Client(namespace='Sejastip')
 
 def send_push_notification_pubsub(event, context):
     """Triggered from a message on a Cloud Pub/Sub topic.
@@ -28,5 +32,19 @@ def send_push_notification_pubsub(event, context):
       message_title=notification_data['data']['title'],
       message_body=notification_data['data']['content']
     )
+
+    now = datetime.now()
+    key = ds_client.key('NotificationLogs')
+    entity = datastore.Entity(key=key, exclude_from_indexes=['title', 'content'])
+    entity.update({
+      'device_target': notification_data['device'],
+      'user_id': notification_data['user_id'],
+      'title': notification_data['data']['title'],
+      'content': notification_data['data']['content'],
+      'status': 'sent',
+      'created_at': now,
+      'updated_at': now
+    })
+    ds_client.put(entity)
 
     print(result)
