@@ -1,6 +1,7 @@
 module sejastip.id/api
 
 require (
+	cloud.google.com/go/pubsub v1.0.1
 	cloud.google.com/go/storage v1.1.0
 	github.com/DATA-DOG/go-sqlmock v1.3.3
 	github.com/GoogleCloudPlatform/cloudsql-proxy v0.0.0-20191010210010-c384db38a6f3
