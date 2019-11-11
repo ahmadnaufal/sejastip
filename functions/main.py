@@ -27,10 +27,17 @@ def send_push_notification_pubsub(event, context):
     # }
     api_key = os.getenv("FIREBASE_API_KEY")
     push_service = FCMNotification(api_key=api_key)
+
+    additional = {
+      'title': notification_data['data']['title'],
+      'message': notification_data['data']['content']
+    }
+
     result = push_service.notify_single_device(
       registration_id=notification_data['device'],
       message_title=notification_data['data']['title'],
-      message_body=notification_data['data']['content']
+      message_body=notification_data['data']['content'],
+      data_message=additional
     )
 
     now = datetime.now()
