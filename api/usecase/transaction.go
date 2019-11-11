@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -178,13 +179,15 @@ func (uc *TransactionUsecase) CreateTransaction(ctx context.Context, transaction
 	// notify
 	device, _ := uc.DeviceRepo.GetUserDevice(ctx, transaction.SellerID)
 	if device != nil {
-		notification := &entity.NotificationRequest{
-			Device: device.DeviceID,
-			UserID: transaction.SellerID,
+		if user, _ := uc.UserRepo.GetUser(ctx, transaction.SellerID); user != nil {
+			notification := &entity.NotificationRequest{
+				Device: device.DeviceID,
+				UserID: transaction.SellerID,
+			}
+			notification.Data.Title = fmt.Sprintf("Hi %s, ada transaksi baru!", user.Name)
+			notification.Data.Content = fmt.Sprintf("Ada yang ingin membeli %s dari kamu.", product.Title)
+			uc.Pubsub.PublishNotification(ctx, notification)
 		}
-		notification.Data.Title = "Ada transaksi baru untuk kamu!"
-		notification.Data.Content = "Ada transaksi baru untuk kamu!"
-		uc.Pubsub.PublishNotification(ctx, notification)
 	}
 
 	return uc.GetTransaction(ctx, transaction.ID)
