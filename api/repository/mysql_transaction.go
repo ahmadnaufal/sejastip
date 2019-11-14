@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -124,4 +125,35 @@ func buildTransactionDynamicQuery(filter entity.DynamicFilter) []sqlm.Expression
 	}
 
 	return filters
+}
+
+func (m *mysqlTransaction) UpdateTransactionState(ctx context.Context, transactionID int64, transaction *entity.Transaction) error {
+	now := time.Now()
+	transaction.UpdatedAt = now
+
+	query := `UPDATE transactions SET
+		status = ?, updated_at = ?
+		WHERE id = ?`
+	prep, err := m.db.PrepareContext(ctx, query)
+	if err != nil {
+		return errors.Wrap(err, "error preparing update transaction query")
+	}
+	defer prep.Close()
+
+	res, err := prep.ExecContext(ctx,
+		transaction.Status, transaction.UpdatedAt, transactionID,
+	)
+	if err != nil {
+		return errors.Wrap(err, "error executing update transaction query")
+	}
+
+	affectedRows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affectedRows != 1 {
+		return errors.New(fmt.Sprintf("Unexpected behavior detected when updating product (total rows affected: %d)", affectedRows))
+	}
+
+	return nil
 }

@@ -46,6 +46,20 @@ var (
 		ErrorCode:  403,
 		HTTPStatus: http.StatusForbidden,
 	}
+
+	// ErrEditTransactionForbidden represents
+	ErrEditTransactionForbidden = SejastipError{
+		Message:    "Kamu tidak bisa mengubah transaksi dalam status saat ini atau transaksi ini bukan milik kamu",
+		ErrorCode:  403,
+		HTTPStatus: http.StatusForbidden,
+	}
+
+	// ErrInvalidTransactionStateTransition represents
+	ErrInvalidTransactionStateTransition = SejastipError{
+		Message:    "Status transaksi tidak valid",
+		ErrorCode:  422,
+		HTTPStatus: http.StatusUnprocessableEntity,
+	}
 )
 
 // SejastipError defines our custom error

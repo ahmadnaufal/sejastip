@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -191,4 +192,44 @@ func (uc *TransactionUsecase) CreateTransaction(ctx context.Context, transaction
 	}
 
 	return uc.GetTransaction(ctx, transaction.ID)
+}
+
+func (uc *TransactionUsecase) UpdateTransaction(ctx context.Context, transactionID int64, form *entity.UpdateTransactionForm) error {
+	transaction, err := uc.TransactionRepo.GetTransaction(ctx, transactionID)
+	if err != nil {
+		return errors.Wrap(err, "error fetching transaction")
+	}
+
+	// check transaction owner. reject any edit request from unauthorized users
+	meta := api.MetaFromContext(ctx)
+	userID := meta.ID
+	// for now, even for the buyer
+	if userID != transaction.SellerID {
+		return api.ErrEditTransactionForbidden
+	}
+
+	if err := form.Validate(); err != nil {
+		// our validation method will always return validation error
+		// which is bad request
+		return api.SejastipError{
+			Message:    err.Error(),
+			ErrorCode:  400,
+			HTTPStatus: http.StatusBadRequest,
+		}
+	}
+
+	// TODO need also validation on transaction state change
+
+	// update the transaction status
+	statusInt, ok := entity.MapStatusToStringReverse[strings.ToLower(form.Status)]
+	if !ok {
+		return api.ErrInvalidTransactionStateTransition
+	}
+	transaction.Status = statusInt
+	err = uc.TransactionRepo.UpdateTransactionState(ctx, transactionID, transaction)
+	if err != nil {
+		return errors.Wrap(err, "error updating transaction state")
+	}
+
+	return nil
 }

@@ -29,6 +29,7 @@ func (h *TransactionHandler) RegisterHandler(r *httprouter.Router) error {
 	r.POST("/transactions", handler.Decorate(h.CreateTransaction, handler.UserAuth...))
 	r.GET("/transactions", handler.Decorate(h.GetTransactions, handler.UserAuth...))
 	r.GET("/transactions/:id", handler.Decorate(h.GetTransaction, handler.AppAuth...))
+	r.PATCH("/transactions/:id", handler.Decorate(h.UpdateTransaction, handler.UserAuth...))
 
 	return nil
 }
@@ -96,5 +97,30 @@ func (h *TransactionHandler) GetTransaction(w http.ResponseWriter, r *http.Reque
 	}
 
 	api.OK(w, transaction, "")
+	return nil
+}
+
+func (h *TransactionHandler) UpdateTransaction(w http.ResponseWriter, r *http.Request, p httprouter.Params) error {
+	transactionID, err := strconv.ParseInt(p.ByName("id"), 10, 64)
+	if err != nil {
+		api.Error(w, err)
+		return err
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	var transactionForm entity.UpdateTransactionForm
+	if err := decoder.Decode(&transactionForm); err != nil {
+		api.Error(w, err)
+		return err
+	}
+
+	ctx := r.Context()
+	err = h.transactionUsecase.UpdateTransaction(ctx, transactionID, &transactionForm)
+	if err != nil {
+		api.Error(w, err)
+		return err
+	}
+
+	api.OK(w, nil, "Transaksi berhasil diperbarui")
 	return nil
 }

@@ -9,17 +9,31 @@ import (
 const (
 	TransactionStatusInit = iota
 	TransactionStatusPaid
+	TransactionStatusInProgress
+	TransactionStatusDelivered
 	TransactionStatusFinished
 	TransactionStatusRejected
 	TransactionStatusExpired
 )
 
 var mapStatusToString = map[int]string{
-	TransactionStatusInit:     "placed",
-	TransactionStatusPaid:     "paid",
-	TransactionStatusFinished: "finished",
-	TransactionStatusRejected: "rejected",
-	TransactionStatusExpired:  "expired",
+	TransactionStatusInit:       "placed",
+	TransactionStatusPaid:       "paid",
+	TransactionStatusInProgress: "in_progress",
+	TransactionStatusDelivered:  "delivered",
+	TransactionStatusFinished:   "finished",
+	TransactionStatusRejected:   "rejected",
+	TransactionStatusExpired:    "expired",
+}
+
+var MapStatusToStringReverse = map[string]int{
+	"placed":      TransactionStatusInit,
+	"paid":        TransactionStatusPaid,
+	"in_progress": TransactionStatusInProgress,
+	"delivered":   TransactionStatusDelivered,
+	"finished":    TransactionStatusFinished,
+	"rejected":    TransactionStatusRejected,
+	"expired":     TransactionStatusExpired,
 }
 
 type Transaction struct {
@@ -75,6 +89,30 @@ func (f *TransactionForm) Validate() error {
 
 	if f.AddressID < 1 {
 		return errors.New("Order address is not selected yet")
+	}
+
+	return nil
+}
+
+type UpdateTransactionForm struct {
+	Status    string `json:"status"`
+	AWBNumber string `json:"awb_number"`
+	Courier   string `json:"courier"`
+}
+
+func (f *UpdateTransactionForm) Validate() error {
+	if f.Status == "" {
+		return errors.New("Status transaksi tujuan diperlukan")
+	}
+
+	if f.Status == "delivered" {
+		if f.AWBNumber == "" {
+			return errors.New("Nomor resi pengiriman wajib diisi")
+		}
+
+		if f.Courier == "" {
+			errors.New("Kurir pengiriman perlu diisi")
+		}
 	}
 
 	return nil
