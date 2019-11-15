@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -15,6 +16,7 @@ import (
 
 type TransactionProvider struct {
 	TransactionRepo api.TransactionRepository
+	ShippingRepo    api.ShippingRepository
 	UserRepo        api.UserRepository
 	ProductRepo     api.ProductRepository
 	AddressRepo     api.UserAddressRepository
@@ -96,9 +98,25 @@ func (uc *TransactionUsecase) convertToPublic(ctx context.Context, transaction *
 		return nil, err
 	}
 
+	// get shipping
+	shipping, err := uc.ShippingRepo.GetShipping(ctx, transaction.ID)
+	if err != nil && err != api.ErrNotFound {
+		return nil, err
+	}
+
 	productPublic := product.ConvertToPublic(country, seller)
 	buyerPublic := buyer.ConvertToPublic()
 	buyerAddressPublic := address.ConvertToPublic()
+
+	var shippingPublic *entity.TransactionShippingPublic
+	if shipping != nil {
+		shippingPublic = &entity.TransactionShippingPublic{
+			AWBNumber: shipping.AWBNumber,
+			Courier:   shipping.Courier,
+			CreatedAt: shipping.CreatedAt,
+			UpdatedAt: shipping.UpdatedAt,
+		}
+	}
 
 	// build the public transaction
 	transactionPublic := &entity.TransactionPublic{
@@ -110,6 +128,7 @@ func (uc *TransactionUsecase) convertToPublic(ctx context.Context, transaction *
 		Notes:        transaction.Notes,
 		TotalPrice:   transaction.TotalPrice,
 		Status:       transaction.GetStatusString(),
+		Shipping:     shippingPublic,
 		PaidAt:       transaction.PaidAt,
 		FinishedAt:   transaction.FinishedAt,
 		CreatedAt:    transaction.CreatedAt,
@@ -225,7 +244,24 @@ func (uc *TransactionUsecase) UpdateTransaction(ctx context.Context, transaction
 	if !ok {
 		return api.ErrInvalidTransactionStateTransition
 	}
+	now := time.Now()
 	transaction.Status = statusInt
+	switch transaction.Status {
+	case entity.TransactionStatusPaid:
+		transaction.PaidAt = &now
+	case entity.TransactionStatusFinished:
+		transaction.FinishedAt = &now
+	case entity.TransactionStatusDelivered:
+		shipping := &entity.TransactionShipping{
+			TransactionID: transactionID,
+			AWBNumber:     form.AWBNumber,
+			Courier:       form.Courier,
+		}
+		err = uc.ShippingRepo.InsertShipping(ctx, shipping)
+		if err != nil {
+			return errors.Wrap(err, "error inserting shipping info")
+		}
+	}
 	err = uc.TransactionRepo.UpdateTransactionState(ctx, transactionID, transaction)
 	if err != nil {
 		return errors.Wrap(err, "error updating transaction state")

@@ -56,6 +56,12 @@ type TransactionRepository interface {
 	UpdateTransactionState(ctx context.Context, transactionID int64, transaction *entity.Transaction) error
 }
 
+// ShippingRepository is a contract for structs implementing transaction shipping storage
+type ShippingRepository interface {
+	InsertShipping(ctx context.Context, shipping *entity.TransactionShipping) error
+	GetShipping(ctx context.Context, transactionID int64) (*entity.TransactionShipping, error)
+}
+
 // DeviceRepository is a contract for structs implementing device storage
 type DeviceRepository interface {
 	GetUserDevice(ctx context.Context, userID int64) (*entity.Device, error)

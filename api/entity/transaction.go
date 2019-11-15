@@ -57,18 +57,19 @@ func (t *Transaction) GetStatusString() string {
 }
 
 type TransactionPublic struct {
-	ID           int64              `json:"id"`
-	Product      *ProductPublic     `json:"product"`
-	Buyer        *UserPublic        `json:"buyer"`
-	BuyerAddress *UserAddressPublic `json:"buyer_address"`
-	Quantity     uint               `json:"quantity"`
-	Notes        string             `json:"notes"`
-	TotalPrice   int64              `json:"total_price"`
-	Status       string             `json:"status"`
-	PaidAt       *time.Time         `json:"paid_at"`
-	FinishedAt   *time.Time         `json:"finished_at"`
-	CreatedAt    time.Time          `json:"created_at"`
-	UpdatedAt    time.Time          `json:"updated_at"`
+	ID           int64                      `json:"id"`
+	Product      *ProductPublic             `json:"product"`
+	Buyer        *UserPublic                `json:"buyer"`
+	BuyerAddress *UserAddressPublic         `json:"buyer_address"`
+	Quantity     uint                       `json:"quantity"`
+	Notes        string                     `json:"notes"`
+	TotalPrice   int64                      `json:"total_price"`
+	Status       string                     `json:"status"`
+	Shipping     *TransactionShippingPublic `json:"shipping"`
+	PaidAt       *time.Time                 `json:"paid_at"`
+	FinishedAt   *time.Time                 `json:"finished_at"`
+	CreatedAt    time.Time                  `json:"created_at"`
+	UpdatedAt    time.Time                  `json:"updated_at"`
 }
 
 type TransactionForm struct {
