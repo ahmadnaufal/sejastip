@@ -121,6 +121,7 @@ func main() {
 	addressRepo := repository.NewMysqlUserAddress(db)
 	transactionRepo := repository.NewMysqlTransaction(db)
 	deviceRepo := repository.NewMysqlDevice(db)
+	shippingRepo := repository.NewMysqlShipping(db)
 
 	appStorage := storage.NewLocalStorage()
 	if config.GCS.Enabled {
@@ -163,6 +164,7 @@ func main() {
 
 	tc := usecase.NewTransactionUsecase(&usecase.TransactionProvider{
 		TransactionRepo: transactionRepo,
+		ShippingRepo:    shippingRepo,
 		UserRepo:        userRepo,
 		ProductRepo:     productRepo,
 		AddressRepo:     addressRepo,
