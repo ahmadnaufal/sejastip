@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_11_14_230456) do
+ActiveRecord::Schema.define(version: 2019_11_16_165239) do
 
   create_table "banks", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "name", limit: 30, null: false
@@ -35,6 +35,8 @@ ActiveRecord::Schema.define(version: 2019_11_14_230456) do
     t.integer "status", limit: 1, default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "receipt_proof", default: ""
+    t.string "payment_method", limit: 50, null: false
     t.index ["invoice_code"], name: "index_invoices_on_invoice_code"
     t.index ["status"], name: "index_invoices_on_status"
     t.index ["transaction_id"], name: "index_invoices_on_transaction_id"
