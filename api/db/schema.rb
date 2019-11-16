@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_11_09_124108) do
+ActiveRecord::Schema.define(version: 2019_11_14_230456) do
 
   create_table "banks", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "name", limit: 30, null: false
@@ -60,6 +60,16 @@ ActiveRecord::Schema.define(version: 2019_11_09_124108) do
     t.index ["title", "deleted_at"], name: "index_products_on_title_and_deleted_at"
     t.index ["title", "seller_id", "deleted_at"], name: "index_products_on_title_and_seller_id_and_deleted_at"
     t.index ["title"], name: "index_products_on_title"
+  end
+
+  create_table "transaction_shippings", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.bigint "transaction_id", null: false
+    t.string "awb_number", limit: 100, default: ""
+    t.string "courier", limit: 64, default: ""
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["courier"], name: "index_transaction_shippings_on_courier"
+    t.index ["transaction_id"], name: "index_transaction_shippings_on_transaction_id"
   end
 
   create_table "transactions", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|

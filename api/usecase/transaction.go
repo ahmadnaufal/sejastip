@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -14,6 +16,7 @@ import (
 
 type TransactionProvider struct {
 	TransactionRepo api.TransactionRepository
+	ShippingRepo    api.ShippingRepository
 	UserRepo        api.UserRepository
 	ProductRepo     api.ProductRepository
 	AddressRepo     api.UserAddressRepository
@@ -95,9 +98,25 @@ func (uc *TransactionUsecase) convertToPublic(ctx context.Context, transaction *
 		return nil, err
 	}
 
+	// get shipping
+	shipping, err := uc.ShippingRepo.GetShipping(ctx, transaction.ID)
+	if err != nil && err != api.ErrNotFound {
+		return nil, err
+	}
+
 	productPublic := product.ConvertToPublic(country, seller)
 	buyerPublic := buyer.ConvertToPublic()
 	buyerAddressPublic := address.ConvertToPublic()
+
+	var shippingPublic *entity.TransactionShippingPublic
+	if shipping != nil {
+		shippingPublic = &entity.TransactionShippingPublic{
+			AWBNumber: shipping.AWBNumber,
+			Courier:   shipping.Courier,
+			CreatedAt: shipping.CreatedAt,
+			UpdatedAt: shipping.UpdatedAt,
+		}
+	}
 
 	// build the public transaction
 	transactionPublic := &entity.TransactionPublic{
@@ -109,6 +128,7 @@ func (uc *TransactionUsecase) convertToPublic(ctx context.Context, transaction *
 		Notes:        transaction.Notes,
 		TotalPrice:   transaction.TotalPrice,
 		Status:       transaction.GetStatusString(),
+		Shipping:     shippingPublic,
 		PaidAt:       transaction.PaidAt,
 		FinishedAt:   transaction.FinishedAt,
 		CreatedAt:    transaction.CreatedAt,
@@ -191,4 +211,61 @@ func (uc *TransactionUsecase) CreateTransaction(ctx context.Context, transaction
 	}
 
 	return uc.GetTransaction(ctx, transaction.ID)
+}
+
+func (uc *TransactionUsecase) UpdateTransaction(ctx context.Context, transactionID int64, form *entity.UpdateTransactionForm) error {
+	transaction, err := uc.TransactionRepo.GetTransaction(ctx, transactionID)
+	if err != nil {
+		return errors.Wrap(err, "error fetching transaction")
+	}
+
+	// check transaction owner. reject any edit request from unauthorized users
+	meta := api.MetaFromContext(ctx)
+	userID := meta.ID
+	// for now, even for the buyer
+	if userID != transaction.SellerID {
+		return api.ErrEditTransactionForbidden
+	}
+
+	if err := form.Validate(); err != nil {
+		// our validation method will always return validation error
+		// which is bad request
+		return api.SejastipError{
+			Message:    err.Error(),
+			ErrorCode:  400,
+			HTTPStatus: http.StatusBadRequest,
+		}
+	}
+
+	// TODO need also validation on transaction state change
+
+	// update the transaction status
+	statusInt, ok := entity.MapStatusToStringReverse[strings.ToLower(form.Status)]
+	if !ok {
+		return api.ErrInvalidTransactionStateTransition
+	}
+	now := time.Now()
+	transaction.Status = statusInt
+	switch transaction.Status {
+	case entity.TransactionStatusPaid:
+		transaction.PaidAt = &now
+	case entity.TransactionStatusFinished:
+		transaction.FinishedAt = &now
+	case entity.TransactionStatusDelivered:
+		shipping := &entity.TransactionShipping{
+			TransactionID: transactionID,
+			AWBNumber:     form.AWBNumber,
+			Courier:       form.Courier,
+		}
+		err = uc.ShippingRepo.InsertShipping(ctx, shipping)
+		if err != nil {
+			return errors.Wrap(err, "error inserting shipping info")
+		}
+	}
+	err = uc.TransactionRepo.UpdateTransactionState(ctx, transactionID, transaction)
+	if err != nil {
+		return errors.Wrap(err, "error updating transaction state")
+	}
+
+	return nil
 }
