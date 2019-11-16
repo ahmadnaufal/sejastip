@@ -9,6 +9,7 @@ type Invoice struct {
 	TransactionID int64         `db:"transaction_id"`
 	InvoiceCode   InvoiceNumber `db:"invoice_code"`
 	CodedPrice    int64         `db:"coded_price"`
+	PaymentMethod string        `db:"payment_method"`
 	Status        int           `db:"status"`
 	ReceiptProof  string        `db:"receipt_proof"`
 	CreatedAt     time.Time     `db:"created_at"`

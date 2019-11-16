@@ -56,6 +56,13 @@ type TransactionRepository interface {
 	UpdateTransactionState(ctx context.Context, transactionID int64, transaction *entity.Transaction) error
 }
 
+// InvoiceRepository is a contract for structs implementing transaction invoice storage
+type InvoiceRepository interface {
+	InsertInvoice(ctx context.Context, invoice *entity.Invoice) error
+	GetInvoice(ctx context.Context, invoiceID int64) (*entity.Invoice, error)
+	UpdateInvoice(ctx context.Context, invoiceID int64, invoice *entity.Invoice) error
+}
+
 // ShippingRepository is a contract for structs implementing transaction shipping storage
 type ShippingRepository interface {
 	InsertShipping(ctx context.Context, shipping *entity.TransactionShipping) error
