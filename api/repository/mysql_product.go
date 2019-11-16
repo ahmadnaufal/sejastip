@@ -104,7 +104,6 @@ func (m *mysqlProduct) GetProduct(ctx context.Context, ID int64) (*entity.Produc
 	query := `
 		SELECT * FROM products
 		WHERE id = ?
-		AND deleted_at IS NULL
 	`
 	result := &entity.Product{}
 	err := m.db.GetContext(ctx, result, query, ID)
