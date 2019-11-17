@@ -25,6 +25,10 @@ func GetUserAgent(r *http.Request) string {
 	return r.Header.Get("User-Agent")
 }
 
+func GetUserID(ctx context.Context) int64 {
+	return MetaFromContext(ctx).ID
+}
+
 func GetPlatform(userAgent string) string {
 	lowerUserAgent := strings.ToLower(userAgent)
 	switch {

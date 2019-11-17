@@ -60,6 +60,13 @@ var (
 		ErrorCode:  422,
 		HTTPStatus: http.StatusUnprocessableEntity,
 	}
+
+	// ErrEditInvoiceForbidden represents
+	ErrEditInvoiceForbidden = SejastipError{
+		Message:    "Kamu tidak bisa mengubah invoice dalam status saat ini atau invoice ini bukan milik kamu",
+		ErrorCode:  403,
+		HTTPStatus: http.StatusForbidden,
+	}
 )
 
 // SejastipError defines our custom error

@@ -42,6 +42,7 @@ type Transaction struct {
 	BuyerID        int64      `db:"buyer_id"`
 	SellerID       int64      `db:"seller_id"`
 	BuyerAddressID int64      `db:"buyer_address_id"`
+	InvoiceID      *int64     `db:"invoice_id"`
 	Quantity       uint       `db:"quantity"`
 	Notes          string     `db:"notes"`
 	TotalPrice     int64      `db:"total_price"`
@@ -66,6 +67,7 @@ type TransactionPublic struct {
 	TotalPrice   int64                      `json:"total_price"`
 	Status       string                     `json:"status"`
 	Shipping     *TransactionShippingPublic `json:"shipping"`
+	InvoiceID    *int64                     `json:"invoice_id"`
 	PaidAt       *time.Time                 `json:"paid_at"`
 	FinishedAt   *time.Time                 `json:"finished_at"`
 	CreatedAt    time.Time                  `json:"created_at"`
