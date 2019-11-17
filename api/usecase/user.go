@@ -40,7 +40,7 @@ func (u *userUsecase) Register(ctx context.Context, user *entity.User) (*entity.
 
 	// validation complete, register the user
 	// encrypt the password first
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 16)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error encrypting password")
 	}
