@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/jmoiron/sqlx"
 	"sejastip.id/api"
 	"sejastip.id/api/entity"
@@ -117,9 +119,7 @@ func (m *mysqlUser) UpdateUser(ctx context.Context, ID int64, user *entity.User)
 		return err
 	}
 	if affectedRows != 1 {
-		return api.SejastipError{
-			Message: fmt.Sprintf("Unexpected behavior detected when updating user (total rows affected: %d)", affectedRows),
-		}
+		return errors.New(fmt.Sprintf("Unexpected behavior detected when updating user (total rows affected: %d)", affectedRows))
 	}
 
 	return nil

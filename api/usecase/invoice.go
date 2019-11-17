@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -37,11 +36,7 @@ func (uc *InvoiceUsecase) InsertInvoice(ctx context.Context, form *entity.Invoic
 	if err != nil {
 		// our validation method will always return validation error
 		// which is bad request
-		return nil, api.SejastipError{
-			Message:    err.Error(),
-			ErrorCode:  400,
-			HTTPStatus: http.StatusBadRequest,
-		}
+		return nil, api.ValidationError(err)
 	}
 
 	// check if transaction ID is valid
@@ -61,11 +56,7 @@ func (uc *InvoiceUsecase) InsertInvoice(ctx context.Context, form *entity.Invoic
 		return nil, errors.Wrap(err, "error fetching existing invoice")
 	}
 	if existingInvoice != nil {
-		return nil, api.SejastipError{
-			Message:    "Transaksi sudah memiliki invoice",
-			ErrorCode:  422,
-			HTTPStatus: http.StatusUnprocessableEntity,
-		}
+		return nil, api.ErrTransactionInvoiceExists
 	}
 
 	// else, create new invoice
@@ -125,11 +116,7 @@ func (uc *InvoiceUsecase) UpdateInvoice(ctx context.Context, invoiceID int64, fo
 	if form.ReceiptProof != "" {
 		file, extension, err := util.DecodeUploadedBase64File(form.ReceiptProof)
 		if err != nil {
-			return nil, api.SejastipError{
-				Message:    fmt.Sprintf("Error parsing file: %v", err),
-				ErrorCode:  400,
-				HTTPStatus: http.StatusBadRequest,
-			}
+			return nil, api.ValidationError(fmt.Errorf("Error parsing file: %v", err))
 		}
 
 		// upload file

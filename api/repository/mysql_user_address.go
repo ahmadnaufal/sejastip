@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 	"sejastip.id/api"
 	"sejastip.id/api/entity"
 )
@@ -114,9 +115,7 @@ func (m *mysqlUserAddress) UpdateAddress(ctx context.Context, ID int64, address 
 		return err
 	}
 	if affectedRows != 1 {
-		return api.SejastipError{
-			Message: fmt.Sprintf("Unexpected behavior detected when updating address data (total rows affected: %d)", affectedRows),
-		}
+		return errors.New(fmt.Sprintf("Unexpected behavior detected when updating address data (total rows affected: %d)", affectedRows))
 	}
 
 	return nil

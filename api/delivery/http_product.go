@@ -84,11 +84,7 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request, _
 	if productForm.ImageFile != "" {
 		file, extension, err := util.DecodeUploadedBase64File(productForm.ImageFile)
 		if err != nil {
-			err = api.SejastipError{
-				Message:    fmt.Sprintf("Error parsing file: %v", err),
-				ErrorCode:  400,
-				HTTPStatus: http.StatusBadRequest,
-			}
+			err = api.ValidationError(fmt.Errorf("Error parsing file: %v", err))
 			api.Error(w, err)
 			return err
 		}

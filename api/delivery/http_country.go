@@ -47,11 +47,7 @@ func (h *CountryHandler) CreateCountry(w http.ResponseWriter, r *http.Request, _
 
 	file, extension, err := util.DecodeUploadedBase64File(countryForm.ImageFile)
 	if err != nil {
-		err = api.SejastipError{
-			Message:    fmt.Sprintf("Error parsing file: %v", err),
-			ErrorCode:  400,
-			HTTPStatus: http.StatusBadRequest,
-		}
+		err = api.ValidationError(fmt.Errorf("Error parsing file: %v", err))
 		api.Error(w, err)
 		return err
 	}
@@ -133,11 +129,7 @@ func (h *CountryHandler) BulkCreateCountries(w http.ResponseWriter, r *http.Requ
 		if form.ImageFile != "" {
 			file, extension, err := util.DecodeUploadedBase64File(form.ImageFile)
 			if err != nil {
-				err = api.SejastipError{
-					Message:    fmt.Sprintf("Error parsing file for index %d: %v", i, err),
-					ErrorCode:  400,
-					HTTPStatus: http.StatusBadRequest,
-				}
+				err = api.ValidationError(fmt.Errorf("Error parsing file for index %d: %v", i, err))
 				api.Error(w, err)
 				return err
 			}

@@ -10,6 +10,7 @@ import (
 	"sejastip.id/api/entity"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 )
 
 type mysqlDevice struct {
@@ -95,9 +96,7 @@ func (m *mysqlDevice) UpdateUserDevice(ctx context.Context, ID int64, newDevice 
 		return err
 	}
 	if affectedRows != 1 {
-		return api.SejastipError{
-			Message: fmt.Sprintf("Unexpected behavior detected when updating device data (total rows affected: %d)", affectedRows),
-		}
+		return errors.New(fmt.Sprintf("Unexpected behavior detected when updating device data (total rows affected: %d)", affectedRows))
 	}
 
 	return nil
@@ -125,9 +124,7 @@ func (m *mysqlDevice) RemoveDevice(ctx context.Context, ID int64) error {
 		return err
 	}
 	if affectedRows != 1 {
-		return api.SejastipError{
-			Message: fmt.Sprintf("Unexpected behavior detected when deleting product (total rows affected: %d)", affectedRows),
-		}
+		return errors.New(fmt.Sprintf("Unexpected behavior detected when deleting device (total rows affected: %d)", affectedRows))
 	}
 
 	return nil

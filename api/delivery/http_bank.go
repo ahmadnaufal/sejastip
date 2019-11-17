@@ -44,11 +44,7 @@ func (h *BankHandler) CreateBank(w http.ResponseWriter, r *http.Request, _ httpr
 
 	file, extension, err := util.DecodeUploadedBase64File(bankForm.ImageFile)
 	if err != nil {
-		err = api.SejastipError{
-			Message:    fmt.Sprintf("Error parsing file: %v", err),
-			ErrorCode:  400,
-			HTTPStatus: http.StatusBadRequest,
-		}
+		err = api.ValidationError(fmt.Errorf("Error parsing file: %v", err))
 		api.Error(w, err)
 		return err
 	}

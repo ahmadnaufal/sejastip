@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"strings"
 	"time"
 
@@ -146,11 +145,7 @@ func (uc *TransactionUsecase) CreateTransaction(ctx context.Context, transaction
 	if err != nil {
 		// our validation method will always return validation error
 		// which is bad request
-		return nil, api.SejastipError{
-			Message:    err.Error(),
-			ErrorCode:  400,
-			HTTPStatus: http.StatusBadRequest,
-		}
+		return nil, api.ValidationError(err)
 	}
 
 	// then, do product validation next
@@ -160,11 +155,7 @@ func (uc *TransactionUsecase) CreateTransaction(ctx context.Context, transaction
 	}
 	// making sure the requesting user does not order his/her own product(s)
 	if product.SellerID == userID {
-		return nil, api.SejastipError{
-			Message:    "Kamu tidak dapat membeli produk yang kamu list sendiri",
-			ErrorCode:  422,
-			HTTPStatus: http.StatusUnprocessableEntity,
-		}
+		return nil, api.ErrBuyOwnProduct
 	}
 
 	// next, do address validation
@@ -175,11 +166,7 @@ func (uc *TransactionUsecase) CreateTransaction(ctx context.Context, transaction
 
 	// making sure the address is owned by the requesting user
 	if address.UserID != userID {
-		return nil, api.SejastipError{
-			Message:    "Alamat tidak sesuai dengan alamat yang sudah kamu simpan",
-			ErrorCode:  422,
-			HTTPStatus: http.StatusUnprocessableEntity,
-		}
+		return nil, api.ErrTransactionAddressNotOwned
 	}
 
 	// finally, after lots of relational validations, we create our transaction object
@@ -232,11 +219,7 @@ func (uc *TransactionUsecase) UpdateTransaction(ctx context.Context, transaction
 	if err := form.Validate(); err != nil {
 		// our validation method will always return validation error
 		// which is bad request
-		return api.SejastipError{
-			Message:    err.Error(),
-			ErrorCode:  400,
-			HTTPStatus: http.StatusBadRequest,
-		}
+		return api.ValidationError(err)
 	}
 
 	// TODO need also validation on transaction state change

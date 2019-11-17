@@ -2,8 +2,6 @@ package usecase
 
 import (
 	"context"
-	"fmt"
-	"net/http"
 
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
@@ -28,11 +26,7 @@ func NewUserUsecase(pvd *UserProvider) api.UserUsecase {
 func (u *userUsecase) Register(ctx context.Context, user *entity.User) (*entity.UserPublic, error) {
 	user.Normalize()
 	if err := user.Validate(); err != nil {
-		return nil, api.SejastipError{
-			Message:    err.Error(),
-			ErrorCode:  400,
-			HTTPStatus: http.StatusBadRequest,
-		}
+		return nil, api.ValidationError(err)
 	}
 
 	// Check if there is an existing user with the specified email
@@ -41,11 +35,7 @@ func (u *userUsecase) Register(ctx context.Context, user *entity.User) (*entity.
 		return nil, errors.Wrap(err, "Error fetching user by email")
 	}
 	if existingUser != nil {
-		return nil, api.SejastipError{
-			Message:    fmt.Sprintf("Email %s sudah digunakan", user.Email),
-			ErrorCode:  1,
-			HTTPStatus: http.StatusBadRequest,
-		}
+		return nil, api.CustomValidationError("Email %s sudah digunakan", user.Email)
 	}
 
 	// validation complete, register the user
