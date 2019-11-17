@@ -187,6 +187,7 @@ func (uc *TransactionUsecase) CreateTransaction(ctx context.Context, transaction
 		ProductID:      transactionForm.ProductID,
 		BuyerID:        userID,
 		SellerID:       product.SellerID,
+		InvoiceID:      nil,
 		BuyerAddressID: transactionForm.AddressID,
 		Quantity:       transactionForm.Quantity,
 		Notes:          transactionForm.Notes,

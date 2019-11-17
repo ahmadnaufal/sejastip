@@ -36,9 +36,9 @@ func (m *mysqlTransaction) CreateTransaction(ctx context.Context, transaction *e
 
 	query := `INSERT INTO transactions
 		(product_id, buyer_id, seller_id, buyer_address_id, quantity,
-			notes, total_price, created_at, updated_at)
+			notes, total_price, invoice_id, created_at, updated_at)
 		VALUES
-		(?, ?, ?, ?, ?, ?, ?, ?, ?)`
+		(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 	prep, err := m.db.PrepareContext(ctx, query)
 	if err != nil {
 		return errors.Wrap(err, "error preparing insert transaction query")
@@ -48,7 +48,7 @@ func (m *mysqlTransaction) CreateTransaction(ctx context.Context, transaction *e
 	res, err := prep.ExecContext(ctx,
 		transaction.ProductID, transaction.BuyerID, transaction.SellerID,
 		transaction.BuyerAddressID, transaction.Quantity, transaction.Notes,
-		transaction.TotalPrice, transaction.CreatedAt, transaction.UpdatedAt,
+		transaction.TotalPrice, transaction.InvoiceID, transaction.CreatedAt, transaction.UpdatedAt,
 	)
 	if err != nil {
 		return errors.Wrap(err, "error executing insert transaction query")
