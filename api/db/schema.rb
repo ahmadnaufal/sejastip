@@ -37,6 +37,7 @@ ActiveRecord::Schema.define(version: 2019_11_16_165239) do
     t.datetime "updated_at", null: false
     t.string "receipt_proof", default: ""
     t.string "payment_method", limit: 50, null: false
+    t.datetime "paid_at"
     t.index ["invoice_code"], name: "index_invoices_on_invoice_code"
     t.index ["status"], name: "index_invoices_on_status"
     t.index ["transaction_id"], name: "index_invoices_on_transaction_id"
@@ -87,6 +88,7 @@ ActiveRecord::Schema.define(version: 2019_11_16_165239) do
     t.datetime "finished_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "invoice_id"
     t.index ["buyer_address_id"], name: "index_transactions_on_buyer_address_id"
     t.index ["buyer_id"], name: "index_transactions_on_buyer_id"
     t.index ["product_id"], name: "index_transactions_on_product_id"

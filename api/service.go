@@ -60,6 +60,7 @@ type TransactionRepository interface {
 type InvoiceRepository interface {
 	InsertInvoice(ctx context.Context, invoice *entity.Invoice) error
 	GetInvoice(ctx context.Context, invoiceID int64) (*entity.Invoice, error)
+	GetInvoiceFromTransaction(ctx context.Context, transactionID int64) (*entity.Invoice, error)
 	UpdateInvoice(ctx context.Context, invoiceID int64, invoice *entity.Invoice) error
 }
 
@@ -128,6 +129,12 @@ type TransactionUsecase interface {
 	GetTransaction(ctx context.Context, transactionID int64) (*entity.TransactionPublic, error)
 	CreateTransaction(ctx context.Context, transactionForm *entity.TransactionForm, userID int64) (*entity.TransactionPublic, error)
 	UpdateTransaction(ctx context.Context, transactionID int64, form *entity.UpdateTransactionForm) error
+}
+
+type InvoiceUsecase interface {
+	InsertInvoice(ctx context.Context, form *entity.InvoiceCreateForm) (*entity.InvoicePublic, error)
+	GetInvoice(ctx context.Context, invoiceID int64) (*entity.InvoicePublic, error)
+	UpdateInvoice(ctx context.Context, invoiceID int64, form *entity.InvoiceUpdateForm) (*entity.InvoicePublic, error)
 }
 
 type DeviceUsecase interface {

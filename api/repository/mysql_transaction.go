@@ -132,7 +132,7 @@ func (m *mysqlTransaction) UpdateTransactionState(ctx context.Context, transacti
 	transaction.UpdatedAt = now
 
 	query := `UPDATE transactions SET
-		status = ?, updated_at = ?
+		status = ?, invoice_id = ?, paid_at = ?, finished_at = ?, updated_at = ?
 		WHERE id = ?`
 	prep, err := m.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -141,7 +141,8 @@ func (m *mysqlTransaction) UpdateTransactionState(ctx context.Context, transacti
 	defer prep.Close()
 
 	res, err := prep.ExecContext(ctx,
-		transaction.Status, transaction.UpdatedAt, transactionID,
+		transaction.Status, transaction.InvoiceID, transaction.PaidAt,
+		transaction.FinishedAt, transaction.UpdatedAt, transactionID,
 	)
 	if err != nil {
 		return errors.Wrap(err, "error executing update transaction query")

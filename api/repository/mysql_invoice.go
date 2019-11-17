@@ -35,16 +35,16 @@ func (m *mysqlInvoice) InsertInvoice(ctx context.Context, invoice *entity.Invoic
 		(?, ?, ?, ?, ?, ?, ?, ?)`
 	prep, err := m.db.PrepareContext(ctx, query)
 	if err != nil {
-		return errors.Wrap(err, "error preparing insert shipping query")
+		return errors.Wrap(err, "error preparing insert invoice query")
 	}
 	defer prep.Close()
 
 	res, err := prep.ExecContext(ctx,
 		invoice.TransactionID, invoice.InvoiceCode, invoice.CodedPrice, invoice.PaymentMethod,
-		invoice.Status, invoice.CreatedAt, invoice.UpdatedAt,
+		invoice.Status, invoice.ReceiptProof, invoice.CreatedAt, invoice.UpdatedAt,
 	)
 	if err != nil {
-		return errors.Wrap(err, "error executing insert shipping query")
+		return errors.Wrap(err, "error executing insert invoice query")
 	}
 
 	invoice.ID, err = res.LastInsertId()
@@ -69,13 +69,31 @@ func (m *mysqlInvoice) GetInvoice(ctx context.Context, invoiceID int64) (*entity
 	return result, nil
 }
 
+func (m *mysqlInvoice) GetInvoiceFromTransaction(ctx context.Context, transactionID int64) (*entity.Invoice, error) {
+	query := `
+		SELECT * FROM invoices
+		WHERE transaction_id = ?
+	`
+	result := &entity.Invoice{}
+	err := m.db.GetContext(ctx, result, query, transactionID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, api.ErrNotFound
+		}
+
+		return nil, err
+	}
+
+	return result, nil
+}
+
 func (m *mysqlInvoice) UpdateInvoice(ctx context.Context, invoiceID int64, invoice *entity.Invoice) error {
 	now := time.Now()
 	invoice.UpdatedAt = now
 
 	query := `UPDATE invoices SET
 		invoice_code = ?, coded_price = ?, payment_method = ?, status = ?,
-		receipt_proof = ?, updated_at = ?
+		paid_at = ?, receipt_proof = ?, updated_at = ?
 		WHERE id = ?`
 	prep, err := m.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -85,7 +103,7 @@ func (m *mysqlInvoice) UpdateInvoice(ctx context.Context, invoiceID int64, invoi
 
 	res, err := prep.ExecContext(ctx,
 		invoice.InvoiceCode, invoice.CodedPrice, invoice.PaymentMethod, invoice.Status,
-		invoice.ReceiptProof, invoice.UpdatedAt,
+		invoice.PaidAt, invoice.ReceiptProof, invoice.UpdatedAt, invoiceID,
 	)
 	if err != nil {
 		return errors.Wrap(err, "error executing update invoice")

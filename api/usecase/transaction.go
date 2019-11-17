@@ -129,6 +129,7 @@ func (uc *TransactionUsecase) convertToPublic(ctx context.Context, transaction *
 		TotalPrice:   transaction.TotalPrice,
 		Status:       transaction.GetStatusString(),
 		Shipping:     shippingPublic,
+		InvoiceID:    transaction.InvoiceID,
 		PaidAt:       transaction.PaidAt,
 		FinishedAt:   transaction.FinishedAt,
 		CreatedAt:    transaction.CreatedAt,
