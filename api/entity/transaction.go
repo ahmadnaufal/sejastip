@@ -104,7 +104,7 @@ type UpdateTransactionForm struct {
 }
 
 func (f *UpdateTransactionForm) Validate() error {
-	if f.Status == "" {
+	if _, ok := MapStatusToStringReverse[f.Status]; !ok {
 		return errors.New("Status transaksi tujuan diperlukan")
 	}
 
@@ -114,7 +114,7 @@ func (f *UpdateTransactionForm) Validate() error {
 		}
 
 		if f.Courier == "" {
-			errors.New("Kurir pengiriman perlu diisi")
+			return errors.New("Kurir pengiriman perlu diisi")
 		}
 	}
 

@@ -10,10 +10,11 @@ export GO111MODULE ?= on
 all: compile test
 
 test:
-	go test -v ./...
+	go test -cover -coverprofile=cover.out -v ./...
 
 coverage:
 	go tool cover -html=cover.out -o cover.html
+	open cover.html
 
 bin:
 	go build -o sejastip-api app/main.go
